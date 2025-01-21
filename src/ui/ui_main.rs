@@ -72,7 +72,7 @@ pub fn ui() {
             }
         );
     }
-    
+
     rl.set_target_fps(60);
 
     let mut cam = Camera2D {
@@ -270,38 +270,6 @@ fn bottom_bar(d: &mut RaylibDrawHandle, state: &mut UIState, cam: &Camera2D) {
             state.show_zoom_reset = false
         }
     }
-
-    // if state.show_jumper {
-    //     let dd_str = CString::new(
-    //         <Vec<LoadedImage> as AsRef<Vec<LoadedImage>>>::as_ref(&state.images)
-    //         .into_iter()
-    //         .map(|i| {
-    //             let s = i.fname.as_str();
-    //             Path::new(s).file_name().and_then(OsStr::to_str).unwrap_or(s)
-    //         }).collect::<Vec<&str>>().join(";").as_str()).unwrap();
-        
-    //     let dd_str = dd_str.as_c_str();
-
-    //     let mut idx = -1;
-
-    //     state.show_jumper = !d.gui_dropdown_box(
-    //         Rectangle{x: 202., y: 4.0, width: 800., height: 24.},
-    //         Some(dd_str),
-    //         &mut idx,
-    //         true
-    //     );
-
-    //     if idx != -1 {
-    //         state.desired_position = state.images[idx as usize].pos + (state.images[idx as usize].size() / 2.)
-    //     }
-
-    //     d.draw_text(
-    //         "jump to where?",
-    //         (state.window_w - d.measure_text("jump to where?", FONT_SIZE_REG)) / 2,
-    //         12, FONT_SIZE_REG,
-    //         Color::BLUE
-    //     );
-    // }
 
     {
         let recenter = Rectangle{x: 112., y: (state.window_h - 24) as f32, width: 90., height: 24.};
