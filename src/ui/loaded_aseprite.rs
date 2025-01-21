@@ -1,10 +1,10 @@
-use std::{f32::consts::FRAC_PI_3, fs::File};
+use std::{f32::consts::FRAC_PI_3, ffi::CString, fs::File};
 
-use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, prelude::{RaylibDraw, RaylibDrawHandle, RaylibMode2D}, texture::{Image, RaylibTexture2D, Texture2D}, RaylibHandle, RaylibThread};
+use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, prelude::{RaylibDraw, RaylibDrawHandle, RaylibMode2D}, rgui::RaylibDrawGui, texture::{RaylibTexture2D, Texture2D}, RaylibHandle, RaylibThread};
 
 use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteLayerFlags, AsepriteTagDirection};
 
-use super::ui_main::{FONT_SIZE_BIG, FONT_SIZE_REG};
+use super::ui_main::{FONT_SIZE_BIG, FONT_SIZE_REG, WINDOW_H};
 
 const GAP: u16 = 4;
 
@@ -17,7 +17,7 @@ const LINKED_COLOR:     Color = Color::YELLOW;
 const ERR_COLOR:        Color = Color::FUCHSIA;
 
 pub struct PreparedCel {
-    image:       Option<Image>,
+    // image:       Option<Image>,
     texture:     Option<Texture2D>,
     frame_index: usize,
     layer_index: u16,
@@ -106,7 +106,7 @@ impl LoadedSprite {
                                     txtr.update_texture(&img_data);
         
                                     loaded_cels.push(PreparedCel{
-                                        image:           Some(img),
+                                        // image:           Some(img),
                                         layer_index:     cel.layer_index,
                                         frame_index:     frame_idx,
                                         texture:         Some(txtr),
@@ -126,7 +126,7 @@ impl LoadedSprite {
                             },
                             aseprite::AsepriteCelType::Linked => {
                                 loaded_cels.push(PreparedCel{
-                                    image:           None,
+                                    // image:           None,
                                     layer_index:     cel.layer_index,
                                     frame_index:     frame_idx,
                                     texture:         None,
@@ -181,8 +181,9 @@ impl LoadedSprite {
 
         for i in 0..self.loaded_cels.len() {
             let img = &self.loaded_cels[i];
+            let my_layer = &self.loaded_layers[img.layer_index as usize];
 
-            if !self.loaded_layers[img.layer_index as usize].visible {
+            if !my_layer.visible || my_layer.is_reference {
                 continue;
             }
 
@@ -286,7 +287,7 @@ impl LoadedSprite {
                     Vector2{ x: 0.0, y: 0.0 }, 
                     0.0, 
                     Color{a: {
-                        let l = (self.loaded_layers[img.layer_index as usize].opacity as f64) / 255.0;
+                        let l = (my_layer.opacity as f64) / 255.0;
                         let r = (img.opacity as f64) / 255.0;
                         (l * r * 255.0).round().clamp(0.0, 255.0) as u8
                     }, ..Color::WHITE}
