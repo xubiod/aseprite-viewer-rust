@@ -106,12 +106,16 @@ pub fn ui() {
 
                 state.toasts.push(
                     Toast::new(
-                        format!(
-                            "file loaded successfully; {} cels, {} frames, {} layers",
-                            state.loaded_sprite.as_ref().unwrap().loaded_cels.len(),
-                            state.loaded_sprite.as_ref().unwrap().loaded_layers.len(),
-                            state.loaded_sprite.as_ref().unwrap().frame_count,
-                        ).as_str(),
+                    {
+                            let r = state.loaded_sprite.as_ref().unwrap();
+                            format!(
+                                "file loaded successfully; {} cels, {} frames, {} layers",
+                                r.loaded_cels.len(),
+                                r.loaded_layers.len(),
+                                r.frame_count,
+                            ).as_str()
+                        }
+                        ,
                         180
                     )
                 );
