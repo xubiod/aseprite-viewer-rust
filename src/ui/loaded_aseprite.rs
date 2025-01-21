@@ -56,7 +56,10 @@ pub(crate) struct LoadedSprite {
     pub loaded_cels:   Vec<PreparedCel>,
     pub loaded_layers: Vec<PreparedLayer>,
     pub loaded_tags:   Vec<PreparedTag>,
-    pub frame_count:   usize
+    pub frame_count:   usize,
+
+    layer_scroll: i32,
+    layer_active: i32,
 }
 
 impl LoadedSprite {
@@ -161,7 +164,7 @@ impl LoadedSprite {
         }
 
         let frame_count = data.frames.len();
-        Ok(Self { main_data: data, loaded_cels, loaded_layers, loaded_tags, frame_count })
+        Ok(Self { main_data: data, loaded_cels, loaded_layers, loaded_tags, frame_count, layer_scroll: 0, layer_active: 0 })
     }
 
     pub fn draw(&mut self, d: &mut RaylibMode2D<'_, RaylibDrawHandle<'_>>, cam: &Camera2D) {
@@ -380,6 +383,27 @@ impl LoadedSprite {
                 Color{a: line_alpha/4, ..BIG_LINE_COLOR}
             );
         }
+    }
+
+    pub fn draw_ui(&mut self, d: &mut RaylibDrawHandle) {
+        let dd_str = CString::new(
+            <Vec<PreparedLayer> as AsRef<Vec<PreparedLayer>>>::as_ref(&self.loaded_layers)
+            .into_iter().rev()
+            .map(|i| {
+                i.name.as_str()
+            }).collect::<Vec<&str>>().join(";").as_str()).unwrap();
+        
+        let dd_str = dd_str.as_c_str();
+        
+        let _ = d.gui_list_view(
+            Rectangle{
+                x: 0.0,
+                y: 0.0,
+                width: 120.0,
+                height: WINDOW_H as f32,
+            },
+            Some(dd_str), &mut self.layer_scroll, &mut self.layer_active
+        );
     }
 
     pub fn step(&mut self, rl: &mut RaylibHandle, cam: &Camera2D) {

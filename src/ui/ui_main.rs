@@ -40,8 +40,8 @@ pub struct UIState {
 
 const ACCEPTED_TYPES: [&str; 2] = [".ase", ".aseprite"];
 
-const WINDOW_W: i32 = 1200;
-const WINDOW_H: i32 = 800;
+pub(crate) const WINDOW_W: i32 = 1200;
+pub(crate) const WINDOW_H: i32 = 800;
 
 pub fn ui() {
     let (mut rl, thread) = raylib::init()
@@ -72,7 +72,7 @@ pub fn ui() {
             }
         );
     }
-
+    
     rl.set_target_fps(60);
 
     let mut cam = Camera2D {
@@ -197,6 +197,10 @@ pub fn ui() {
                 //     let tx_w = d.measure_text(tx,FONT_SIZE_BIG);
                 //     d.draw_text(&tx, (state.window_w - tx_w)/2, (state.window_h/2)-12, FONT_SIZE_BIG, Color::BLACK);
                 // }
+
+                if let Some(ref mut img) = state.loaded_sprite {
+                    img.draw_ui(&mut d);
+                }
 
                 let mut toast_y = 0.0;
                 for toast in &mut state.toasts {
