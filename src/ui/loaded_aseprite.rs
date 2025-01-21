@@ -14,7 +14,7 @@ const BIG_LINE_COLOR:   Color = Color::GRAY;
 
 const LABEL_COLOR:      Color = SMALL_LINE_COLOR;
 
-const LINKED_COLOR:     Color = Color::YELLOW;
+const LINKED_COLOR:     Color = Color::ORANGERED;
 const ERR_COLOR:        Color = Color::FUCHSIA;
 
 pub struct PreparedCel {
@@ -169,11 +169,13 @@ impl LoadedSprite {
     }
 
     pub fn draw(&mut self, d: &mut RaylibMode2D<'_, RaylibDrawHandle<'_>>, cam: &Camera2D) {
-        let scale_x: i32 = self.main_data.header.pixel_width.max(1).into();
-        let scale_y: i32 = self.main_data.header.pixel_height.max(1).into();
+        let header = &self.main_data.header;
 
-        let image_width = self.main_data.header.width;
-        let image_height = self.main_data.header.height;
+        let scale_x: i32 = header.pixel_width.max(1).into();
+        let scale_y: i32 = header.pixel_height.max(1).into();
+
+        let image_width = header.width;
+        let image_height = header.height;
 
         let off = Vector2{
             x: (image_width * scale_x as u16 + GAP) as f32,
@@ -227,8 +229,6 @@ impl LoadedSprite {
                     );
 
                     for i in 0..(img.frame_index as u16 - link) {
-                        // let i = i as usize;
-
                         let cx = (((link + i + 1) as f32 - d.get_time().fract() as f32) * (off.x as f32 + 1.0) + (image_width as f32 / 2.0)) as i32;
                         let cy = (img.layer_index as f32 * (off.y as f32 + 1.0) - (image_height as f32 / 2.0)) as i32 * -1;
                         let r = 3.5;
