@@ -1,6 +1,7 @@
 use std::{f32::consts::FRAC_PI_3, ffi::CString, fs::File};
 
-use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, prelude::{RaylibDraw, RaylibDrawHandle, RaylibMode2D}, rgui::RaylibDrawGui, texture::{RaylibTexture2D, Texture2D}, RaylibHandle, RaylibThread};
+use raylib::prelude::*;
+use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, rgui::RaylibDrawGui, texture::{RaylibTexture2D, Texture2D}, RaylibHandle, RaylibThread};
 
 use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteLayerFlags, AsepriteTagDirection};
 
