@@ -35,7 +35,7 @@ pub struct AsepriteString {
 impl AsepriteString {
     pub fn read_from_bytes(from: &[u8]) -> Self {
         let length = slice_to!(u16, &from[0..2]);
-        let data = from[2..length as usize].to_vec();
+        let data = from[2..].to_vec();
         Self {
             length,
             data
