@@ -391,9 +391,7 @@ impl LoadedSprite {
         let dd_str = CString::new(
             <Vec<PreparedLayer> as AsRef<Vec<PreparedLayer>>>::as_ref(&self.loaded_layers)
             .into_iter().rev()
-            .map(|i| {
-                i.name.as_str()
-            }).collect::<Vec<&str>>().join(";").as_str()).unwrap();
+            .map(|i| i.name.as_str()).collect::<Vec<&str>>().join(";").as_str()).unwrap();
         
         let dd_str = dd_str.as_c_str();
         
@@ -409,22 +407,23 @@ impl LoadedSprite {
     }
 
     pub fn step(&mut self, rl: &mut RaylibHandle, cam: &Camera2D) {
+        let header = &self.main_data.header;
         let mouse_pt = rl.get_screen_to_world2D(rl.get_mouse_position(), cam);
 
-        let scale_x: i32 = self.main_data.header.pixel_width.max(1).into();
-        let scale_y: i32 = self.main_data.header.pixel_height.max(1).into();
+        let scale_x: i32 = header.pixel_width.max(1).into();
+        let scale_y: i32 = header.pixel_height.max(1).into();
 
         let off = Vector2{
-            x: (self.main_data.header.width * scale_x as u16 + GAP) as f32,
-            y: (self.main_data.header.height * scale_y as u16 + GAP) as f32
+            x: (header.width * scale_x as u16 + GAP) as f32,
+            y: (header.height * scale_y as u16 + GAP) as f32
         };
 
         for img in &mut self.loaded_cels {
             let range = Rectangle{
                 x: (img.frame_index as f32 * off.x as f32) * scale_x as f32,
                 y: (img.layer_index as f32 * off.y as f32) * scale_y as f32 * -1.0,
-                width: self.main_data.header.width as f32 * scale_x as f32,
-                height: self.main_data.header.height as f32 * scale_y as f32,
+                width: header.width as f32 * scale_x as f32,
+                height: header.height as f32 * scale_y as f32,
             };
 
             img.hover = range.check_collision_point_rec(mouse_pt);
