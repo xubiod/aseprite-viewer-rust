@@ -19,7 +19,8 @@ const LABEL_COLOR:      Color = SMALL_LINE_COLOR;
 const LINKED_COLOR:     Color = Color::ORANGERED;
 const ERR_COLOR:        Color = Color::FUCHSIA;
 
-const NO_PARENT:        usize = usize::MAX;
+const NO_PARENT:       usize = usize::MAX;
+const RECURSIVE_LIMIT: u8 = 16;
 
 pub struct PreparedCel {
     // image:       Option<Image>,
@@ -72,25 +73,25 @@ pub(crate) struct LoadedSprite {
 
 impl LoadedSprite {
     pub(crate) fn is_layer_visible(&self, layer_index: usize) -> bool {
-        self.internal_layer_visible(layer_index, 16)
+        self.internal_layer_visible(layer_index, RECURSIVE_LIMIT)
     }
 
     fn internal_layer_visible(&self, layer_index: usize, deepness: u8) -> bool {
         let layer = &self.loaded_layers[layer_index];
         if layer.visible && layer.parent_index != NO_PARENT && deepness > 0 {
-            layer.visible && self.internal_layer_visible(layer.parent_index, deepness - 1)
+            layer.visible && self.internal_layer_visible(layer.parent_index, deepness.min(RECURSIVE_LIMIT) - 1)
         } else { layer.visible }
     }
 
     pub(crate) fn layer_name(&self, layer_index: usize) -> String {
-        self.internal_layer_name(layer_index, 16)
+        self.internal_layer_name(layer_index, RECURSIVE_LIMIT)
     }
 
     fn internal_layer_name(&self, layer_index: usize, deepness: u8) -> String {
         let layer = &self.loaded_layers[layer_index];
         let mut result = layer.name.clone();
         if layer.parent_index != NO_PARENT && deepness > 0 {
-            result = format!("{}.{}", result, self.internal_layer_name(layer.parent_index, deepness - 1))
+            result = format!("{}.{}", result, self.internal_layer_name(layer.parent_index, deepness.min(RECURSIVE_LIMIT) - 1))
         }
         result
     }
@@ -214,12 +215,7 @@ impl LoadedSprite {
         let mut r = Self { main_data: data, loaded_cels, loaded_layers, loaded_tags, frame_count, layer_scroll: 0, layer_active: 0 };
 
         for layer_index in 0..r.loaded_layers.len() {
-            match r.loaded_layers[layer_index].full_name {
-                None => {
-                    r.loaded_layers[layer_index].full_name = Some(r.layer_name(layer_index))
-                },
-                _ => break
-            }
+            r.loaded_layers[layer_index].full_name = Some(r.layer_name(layer_index))
         }
 
         Ok(r)
