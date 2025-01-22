@@ -279,7 +279,7 @@ fn bottom_bar(d: &mut RaylibDrawHandle, state: &mut UIState, cam: &Camera2D) {
         let recenter = Rectangle{x: 112., y: (state.window_h - 24) as f32, width: 90., height: 24.};
         let t = format!("#48# {0:.0}, {1:.0}", cam.target.x, cam.target.y);
         let recenter_tx = if recenter.check_collision_point_rec(d.get_mouse_position()) /* && state.images.len() > 1 */ {
-            "#48# go to?"
+            "#48# recenter?"
         } else {
             t.as_str() 
         };
