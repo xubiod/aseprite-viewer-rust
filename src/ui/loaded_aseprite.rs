@@ -82,7 +82,7 @@ impl LoadedSprite {
         } else { layer.visible }
     }
 
-    fn layer_name(&self, layer_index: usize) -> String {
+    pub(crate) fn layer_name(&self, layer_index: usize) -> String {
         self.internal_layer_name(layer_index, 16)
     }
 
@@ -360,7 +360,7 @@ impl LoadedSprite {
             let m = d.measure_text(&l.name, FONT_SIZE_REG);
 
             d.draw_text(
-                &l.name,
+                l.full_name.as_ref().unwrap(),
                 (16 + m) * -1,
                 (off.y as i32 * i as i32 - (off.x / 2.0) as i32) * -1,
                 FONT_SIZE_REG, LABEL_COLOR
