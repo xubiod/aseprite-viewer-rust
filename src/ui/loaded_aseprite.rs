@@ -186,7 +186,7 @@ impl LoadedSprite {
             let img = &self.loaded_cels[i];
             let my_layer = &self.loaded_layers[img.layer_index as usize];
 
-            if !my_layer.visible || my_layer.is_reference {
+            if !my_layer.visible {
                 continue;
             }
 
