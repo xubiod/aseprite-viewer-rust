@@ -417,7 +417,7 @@ impl LoadedSprite {
                 x: 128.0,
                 y: 0.0,
                 width: 120.0,
-                height: 110.0,
+                height: 130.0,
             };
 
             let layer_name = CString::new(self.loaded_layers[effective_layer_active].name.as_str()).unwrap();
