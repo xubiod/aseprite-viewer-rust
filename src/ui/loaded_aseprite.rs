@@ -391,7 +391,12 @@ impl LoadedSprite {
         let dd_str = CString::new(
             <Vec<PreparedLayer> as AsRef<Vec<PreparedLayer>>>::as_ref(&self.loaded_layers)
             .into_iter().rev()
-            .map(|i| i.name.as_str()).collect::<Vec<&str>>().join(";").as_str()).unwrap();
+            .map(|i| {
+                format!("{} {}",
+                    if i.visible { "#44#" } else { "#45#" }, 
+                    &i.name
+                )
+            }).collect::<Vec<String>>().join(";").as_str()).unwrap();
         
         let dd_str = dd_str.as_c_str();
         
@@ -404,6 +409,49 @@ impl LoadedSprite {
             },
             Some(dd_str), &mut self.layer_scroll, &mut self.layer_active
         );
+
+        let effective_layer_active = (self.loaded_layers.len() - 1) - self.layer_active as usize;
+
+        {
+            let prop_bounds = Rectangle{
+                x: 128.0,
+                y: 0.0,
+                width: 120.0,
+                height: 110.0,
+            };
+
+            let layer_name = CString::new(self.loaded_layers[effective_layer_active].name.as_str()).unwrap();
+            let layer_name = layer_name.as_c_str();
+
+            let _ = d.gui_window_box(prop_bounds, Some(layer_name));
+            
+            let properties_contents = CString::new({
+                let layer = &self.loaded_layers[effective_layer_active];
+
+                format!("Blend mode: {}\nOpacity: {}{}{}",
+                    layer.blend_mode.to_string(), 
+                    layer.opacity, 
+                    if layer.background {"\nIs a background"} else {""},
+                    if layer.is_reference {"\nIs a reference"} else {""},
+                )
+            }).unwrap();
+            let properties_contents = properties_contents.as_c_str();
+            
+            d.gui_label(Rectangle{
+                x: prop_bounds.x + 4.0,
+                y: prop_bounds.y + 24.0,
+                width: prop_bounds.width,
+                height: 72.0
+            }, Some(properties_contents));
+
+            d.gui_check_box(Rectangle{
+                x: prop_bounds.x + 8.0,
+                y: prop_bounds.y + prop_bounds.height - 28.0,
+                width: 24.0,
+                height: 24.0,
+            }, Some(rstr!("Visible")), &mut self.loaded_layers[effective_layer_active].visible);
+        }
+
     }
 
     pub fn step(&mut self, rl: &mut RaylibHandle, cam: &Camera2D) {
