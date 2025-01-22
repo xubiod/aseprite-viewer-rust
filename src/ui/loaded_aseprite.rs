@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::usize;
 use std::{f32::consts::FRAC_PI_3, ffi::CString, fs::File};
 
 use raylib::prelude::*;
@@ -16,6 +18,8 @@ const LABEL_COLOR:      Color = SMALL_LINE_COLOR;
 
 const LINKED_COLOR:     Color = Color::ORANGERED;
 const ERR_COLOR:        Color = Color::FUCHSIA;
+
+const NO_PARENT:        usize = usize::MAX;
 
 pub struct PreparedCel {
     // image:       Option<Image>,
@@ -41,7 +45,10 @@ pub struct PreparedLayer {
 
     visible:      bool,
     background:   bool,
-    is_reference: bool
+    is_reference: bool,
+
+    parent_index: usize,
+    full_name:    Option<String>
 }
 
 pub struct PreparedTag {
@@ -64,6 +71,30 @@ pub(crate) struct LoadedSprite {
 }
 
 impl LoadedSprite {
+    pub(crate) fn is_layer_visible(&self, layer_index: usize) -> bool {
+        self.internal_layer_visible(layer_index, 16)
+    }
+
+    fn internal_layer_visible(&self, layer_index: usize, deepness: u8) -> bool {
+        let layer = &self.loaded_layers[layer_index];
+        if layer.visible && layer.parent_index != NO_PARENT && deepness > 0 {
+            layer.visible && self.internal_layer_visible(layer.parent_index, deepness - 1)
+        } else { layer.visible }
+    }
+
+    fn layer_name(&self, layer_index: usize) -> String {
+        self.internal_layer_name(layer_index, 16)
+    }
+
+    fn internal_layer_name(&self, layer_index: usize, deepness: u8) -> String {
+        let layer = &self.loaded_layers[layer_index];
+        let mut result = layer.name.clone();
+        if layer.parent_index != NO_PARENT && deepness > 0 {
+            result = format!("{}.{}", result, self.internal_layer_name(layer.parent_index, deepness - 1))
+        }
+        result
+    }
+
     pub fn load(fname: &str, rl: &mut RaylibHandle, thread: &RaylibThread) -> Result<Self, ()> {
         let mut f_in = File::open(fname).unwrap();
     
@@ -85,7 +116,10 @@ impl LoadedSprite {
                             visible:        lchunk.flags & AsepriteLayerFlags::Visible > 0,
                             background:     lchunk.flags & AsepriteLayerFlags::Background > 0,
                             is_reference:   lchunk.flags & AsepriteLayerFlags::IsReference > 0,
-                            name:           lchunk.name.as_str().unwrap().to_owned()
+                            name:           lchunk.name.as_str().unwrap().to_owned(),
+                            full_name:      None,
+
+                            parent_index:   NO_PARENT,
                         });
                     },
                     aseprite::Chunk::Cel(cel) => {
@@ -164,8 +198,31 @@ impl LoadedSprite {
             }
         }
 
+        {
+            let mut parent_map: HashMap<i32, usize> = HashMap::<i32, usize>::new();
+            parent_map.insert(-1, NO_PARENT);
+
+            for layer_idx in 0..loaded_layers.len() {
+                let layer = &mut loaded_layers[layer_idx];
+                parent_map.insert(layer_idx as i32, layer_idx);
+
+                layer.parent_index = *parent_map.get(&((layer.child_level as i32) - 1)).unwrap_or(&NO_PARENT);
+            }
+        }
+
         let frame_count = data.frames.len();
-        Ok(Self { main_data: data, loaded_cels, loaded_layers, loaded_tags, frame_count, layer_scroll: 0, layer_active: 0 })
+        let mut r = Self { main_data: data, loaded_cels, loaded_layers, loaded_tags, frame_count, layer_scroll: 0, layer_active: 0 };
+
+        for layer_index in 0..r.loaded_layers.len() {
+            match r.loaded_layers[layer_index].full_name {
+                None => {
+                    r.loaded_layers[layer_index].full_name = Some(r.layer_name(layer_index))
+                },
+                _ => break
+            }
+        }
+
+        Ok(r)
     }
 
     pub fn draw(&mut self, d: &mut RaylibMode2D<'_, RaylibDrawHandle<'_>>, cam: &Camera2D) {
@@ -186,7 +243,7 @@ impl LoadedSprite {
             let img = &self.loaded_cels[i];
             let my_layer = &self.loaded_layers[img.layer_index as usize];
 
-            if !my_layer.visible {
+            if !self.is_layer_visible(img.layer_index as usize) {
                 continue;
             }
 
@@ -394,7 +451,7 @@ impl LoadedSprite {
             .map(|i| {
                 format!("{} {}",
                     if i.visible { "#44#" } else { "#45#" }, 
-                    &i.name
+                    i.full_name.as_ref().unwrap()
                 )
             }).collect::<Vec<String>>().join(";").as_str()).unwrap();
         
