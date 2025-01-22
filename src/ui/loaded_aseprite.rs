@@ -20,7 +20,7 @@ const LINKED_COLOR:     Color = Color::ORANGERED;
 const ERR_COLOR:        Color = Color::FUCHSIA;
 
 const NO_PARENT:       usize = usize::MAX;
-const RECURSIVE_LIMIT: u8 = 16;
+const RECURSIVE_LIMIT: u8    = 16;
 
 pub struct PreparedCel {
     // image:       Option<Image>,
