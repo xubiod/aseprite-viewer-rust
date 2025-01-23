@@ -354,6 +354,7 @@ impl LoadedSprite {
         for i in 0..self.loaded_layers.len() {
             let l = &self.loaded_layers[i];
             let m = d.measure_text(&l.name, FONT_SIZE_REG);
+            let my_alpha = line_alpha / if l.visible { 1 } else { 2 };
 
             d.draw_text(
                 l.full_name.as_ref().unwrap(),
@@ -368,13 +369,13 @@ impl LoadedSprite {
             d.draw_line(
                 (16 + m) * -1, line_y,
                 (16 + m) * -1 + (off.x * self.frame_count as f32) as i32, line_y,
-                Color{a: line_alpha, ..SMALL_LINE_COLOR}
+                Color{a: my_alpha, ..SMALL_LINE_COLOR}
             );
             
             d.draw_line(
                 (16 + m) * -1, line_y2,
                 (16 + m) * -1 + (off.x * self.frame_count as f32) as i32, line_y2,
-                Color{a: line_alpha, ..SMALL_LINE_COLOR}
+                Color{a: my_alpha, ..SMALL_LINE_COLOR}
             );
 
             d.draw_line_ex(
@@ -386,7 +387,7 @@ impl LoadedSprite {
                     y: line_y2 as f32 + (GAP / 2) as f32 + 0.5,
                 }, 
                 GAP as f32 + 1.,
-                Color{a: line_alpha/4, ..BIG_LINE_COLOR}
+                Color{a: my_alpha/4, ..BIG_LINE_COLOR}
             );
         }
 
