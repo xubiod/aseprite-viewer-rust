@@ -72,6 +72,10 @@ pub(crate) struct LoadedSprite {
 }
 
 impl LoadedSprite {
+    /// Gets a layer's visibilty depending on its parents. Care should be taken
+    /// as it is *recursive* with a depth limit specified by `RECURSIVE_LIMIT`.
+    /// 
+    /// If any layer in the process is not visible, the recursion stops early.
     pub(crate) fn is_layer_visible(&self, layer_index: usize) -> bool {
         self.internal_layer_visible(layer_index, RECURSIVE_LIMIT)
     }
@@ -80,9 +84,16 @@ impl LoadedSprite {
         let layer = &self.loaded_layers[layer_index];
         if layer.visible && layer.parent_index != NO_PARENT && deepness > 0 {
             layer.visible && self.internal_layer_visible(layer.parent_index, deepness.min(RECURSIVE_LIMIT) - 1)
-        } else { layer.visible }
+        } else { layer.visible } // should be false unless it's really deep
     }
 
+    /// Gets full name of a layer. Should **NOT** be repeatedly called as it is:
+    /// - *Recursive* (to a maximum depth specified by `RECURSIVE_LIMIT`)
+    /// - *Clones* all `String`s from a layer and its parent's, and so on
+    /// 
+    /// Internally this is called with `LoadedSprite::load()` for layers and is
+    /// stored as its `full_name` within an option, and using the layer's
+    /// `full_name` should be used instead of calling this.
     pub(crate) fn layer_name(&self, layer_index: usize) -> String {
         self.internal_layer_name(layer_index, RECURSIVE_LIMIT)
     }
