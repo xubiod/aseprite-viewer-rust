@@ -479,24 +479,21 @@ impl LoadedSprite {
 
             let _ = d.gui_window_box(prop_bounds, Some(layer_name));
             
-            let properties_contents = CString::new({
-                let layer = &self.loaded_layers[effective_layer_active];
-
-                format!("Blend mode: {}\nOpacity: {}{}{}",
-                    layer.blend_mode.to_string(), 
-                    layer.opacity, 
-                    if layer.background {"\nIs a background"} else {""},
-                    if layer.is_reference {"\nIs a reference"} else {""},
-                )
-            }).unwrap();
-            let properties_contents = properties_contents.as_c_str();
+            let layer = &self.loaded_layers[effective_layer_active];
+            let properties_contents = rstr!(
+                "Blend mode: {}\nOpacity: {}{}{}",
+                layer.blend_mode.to_string(), 
+                layer.opacity, 
+                if layer.background {"\nIs a background"} else {""},
+                if layer.is_reference {"\nIs a reference"} else {""},
+            );
             
             d.gui_label(Rectangle{
                 x: prop_bounds.x + 4.0,
                 y: prop_bounds.y + 24.0,
                 width: prop_bounds.width,
                 height: 72.0
-            }, Some(properties_contents));
+            }, Some(properties_contents.as_c_str()));
 
             d.gui_check_box(Rectangle{
                 x: prop_bounds.x + 8.0,
