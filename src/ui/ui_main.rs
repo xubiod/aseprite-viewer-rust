@@ -124,11 +124,6 @@ pub fn ui() {
             state.show_jumper |= rl.is_key_down(KeyboardKey::KEY_LEFT_CONTROL) && rl.is_key_down(KeyboardKey::KEY_J);
             // state.show_jumper &= state.images.len() > 1;
 
-            // let mut is_movable = true;
-            // for img in &mut state.images.iter_mut().rev() {
-            //     is_movable &= img.step(&rl, &cam, is_movable);
-            // }
-
             state.desired_zoom += rl.get_mouse_wheel_move() / 10.;
             state.desired_zoom = state.desired_zoom.clamp(MAX_ZOOM_IN, MAX_ZOOM_OUT);
             
@@ -182,9 +177,6 @@ pub fn ui() {
                     d.draw_circle(px as i32, py as i32, part.spd / cam.zoom, Color{ a: 40, ..Color::WHITE });
                 }
                 
-                // for img in &mut state.images {
-                //     img.draw(&mut d);
-                // }
                 if let Some(ref mut spr) = state.loaded_sprite {
                     spr.draw(&mut d, &cam);
                 }
@@ -192,10 +184,6 @@ pub fn ui() {
 
             // draw screenspace
             {
-                // for img in &mut state.images {
-                //     img.draw_ui(&mut d, &cam);
-                // }
-                
                 // if state.images.len() == 0 {
                 //     let tx = "drag and drop an image..";
                 //     let tx_w = d.measure_text(tx,FONT_SIZE_BIG);
