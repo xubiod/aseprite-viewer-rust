@@ -184,15 +184,14 @@ pub fn ui() {
 
             // draw screenspace
             {
-                // if state.images.len() == 0 {
-                //     let tx = "drag and drop an image..";
-                //     let tx_w = d.measure_text(tx,FONT_SIZE_BIG);
-                //     d.draw_text(&tx, (state.window_w - tx_w)/2, (state.window_h/2)-12, FONT_SIZE_BIG, Color::BLACK);
-                // }
-
-                if let Some(ref mut img) = state.loaded_sprite {
-                    img.draw_ui(&mut d);
-                }
+                match state.loaded_sprite {
+                    Some(ref mut img) => img.draw_ui(&mut d),
+                    None => {
+                        let tx = "drag and drop an aseprite file..";
+                        let tx_w = d.measure_text(tx,FONT_SIZE_BIG);
+                        d.draw_text(&tx, (state.window_w - tx_w)/2, (state.window_h/2)-12, FONT_SIZE_BIG, Color::RAYWHITE);
+                    },
+                };
 
                 let mut toast_y = 0.0;
                 for toast in &mut state.toasts {
