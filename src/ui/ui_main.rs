@@ -30,7 +30,6 @@ pub struct UIState {
     desired_position: Vector2,
 
     show_zoom_reset: bool,
-    show_jumper: bool,
 
     pub window_w: i32,
     pub window_h: i32,
@@ -120,9 +119,6 @@ pub fn ui() {
                     }
                 }
             }
-
-            state.show_jumper |= rl.is_key_down(KeyboardKey::KEY_LEFT_CONTROL) && rl.is_key_down(KeyboardKey::KEY_J);
-            // state.show_jumper &= state.images.len() > 1;
 
             state.desired_zoom += rl.get_mouse_wheel_move() / 10.;
             state.desired_zoom = state.desired_zoom.clamp(MAX_ZOOM_IN, MAX_ZOOM_OUT);
@@ -272,7 +268,6 @@ fn bottom_bar(d: &mut RaylibDrawHandle, state: &mut UIState, cam: &Camera2D) {
         };
         
         if label_wrapper(d, recenter, recenter_tx, /* state.images.len() > 1*/ true) {
-            // state.show_jumper ^= true;
             state.desired_position = Vector2{x: 0.0, y: 0.0};
         }
     }
