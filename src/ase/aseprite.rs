@@ -410,8 +410,14 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, ()> {
             return Err(());
         }
 
+        let frames_end = from.stream_position().unwrap_or_default() + frame.size as u64;
+
         for _ in 0..frame.chunk_count {
             let current_position = from.stream_position().unwrap_or_default();
+
+            if current_position >= frames_end {
+                println!("frame data spills out of the size in the header at pos {}!\ngoing to continue..", current_position)
+            }
 
             let size = {
                 let mut buffer = [0u8; size_of::<u32>()];
