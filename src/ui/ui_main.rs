@@ -99,26 +99,26 @@ pub fn ui() {
 
                             state.loaded_sprite = new.ok();
 
+                            state.toasts.push(
+                                Toast::new(
+                                {
+                                        let r = state.loaded_sprite.as_ref().unwrap();
+                                        format!(
+                                            "file loaded successfully; {} cels, {} frames, {} layers",
+                                            r.loaded_cels.len(),
+                                            r.loaded_layers.len(),
+                                            r.frame_count,
+                                        ).as_str()
+                                    }
+                                    ,
+                                    180
+                                )
+                            );
+
                             break
                         }
                     }
                 }
-
-                state.toasts.push(
-                    Toast::new(
-                    {
-                            let r = state.loaded_sprite.as_ref().unwrap();
-                            format!(
-                                "file loaded successfully; {} cels, {} frames, {} layers",
-                                r.loaded_cels.len(),
-                                r.loaded_layers.len(),
-                                r.frame_count,
-                            ).as_str()
-                        }
-                        ,
-                        180
-                    )
-                );
             }
 
             state.show_jumper |= rl.is_key_down(KeyboardKey::KEY_LEFT_CONTROL) && rl.is_key_down(KeyboardKey::KEY_J);
