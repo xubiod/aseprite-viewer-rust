@@ -293,23 +293,23 @@ impl LoadedSprite {
                     );
 
                     for i in 0..(img.frame_index as u16 - link) {
-                        let cx = (((link + i + 1) as f32 - d.get_time().fract() as f32) * (off.x as f32 + 1.0) + (image_width as f32 / 2.0)) as i32;
-                        let cy = (img.layer_index as f32 * (off.y as f32 + 1.0) - (image_height as f32 / 2.0)) as i32 * -1;
+                        let cx = ((link + i + 1) as f32 - d.get_time().fract() as f32) * (off.x as f32 + 1.0) + (image_width as f32 / 2.0);
+                        let cy = (img.layer_index as f32 * (off.y as f32 + 1.0) - (image_height as f32 / 2.0)) * -1.0;
                         let r = 3.5;
 
                         let v1 = Vector2{
-                            x: cx as f32 + (r * f32::cos(1.0 * FRAC_PI_3)),
-                            y: cy as f32 + (r * f32::sin(1.0 * FRAC_PI_3))
+                            x: cx + (r * f32::cos(1.0 * FRAC_PI_3)),
+                            y: cy + (r * f32::sin(1.0 * FRAC_PI_3))
                         };
 
                         let v2 = Vector2{
-                            x: cx as f32 + (r * f32::cos(3.0 * FRAC_PI_3)),
-                            y: cy as f32 + (r * f32::sin(3.0 * FRAC_PI_3))
+                            x: cx + (r * f32::cos(3.0 * FRAC_PI_3)),
+                            y: cy + (r * f32::sin(3.0 * FRAC_PI_3))
                         };
 
                         let v3 = Vector2{
-                            x: cx as f32 + (r * f32::cos(5.0 * FRAC_PI_3)),
-                            y: cy as f32 + (r * f32::sin(5.0 * FRAC_PI_3))
+                            x: cx + (r * f32::cos(5.0 * FRAC_PI_3)),
+                            y: cy + (r * f32::sin(5.0 * FRAC_PI_3))
                         };
 
                         d.draw_triangle(
