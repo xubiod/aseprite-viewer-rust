@@ -108,8 +108,7 @@ pub fn ui() {
                                             r.loaded_layers.len(),
                                             r.frame_count,
                                         ).as_str()
-                                    }
-                                    ,
+                                    },
                                     180
                                 )
                             );
