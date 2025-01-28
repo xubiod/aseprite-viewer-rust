@@ -28,6 +28,7 @@ pub struct UIState {
     fit_zoom: f32,
 
     desired_position: Vector2,
+    default_position: Vector2,
 
     show_zoom_reset: bool,
 
@@ -100,13 +101,15 @@ pub fn ui() {
 
                             let img_ref = state.loaded_sprite.as_ref().unwrap();
 
-                            state.desired_position = Vector2{
+                            state.default_position = Vector2{
                                 x: (img_ref.frame_count + GAP as usize) as f32 * img_ref.main_data.header.pixel_width as f32 * img_ref.main_data.header.width as f32,
                                 y: (img_ref.loaded_layers.len() + GAP as usize) as f32 * img_ref.main_data.header.pixel_height as f32 * img_ref.main_data.header.height as f32,
                             };
 
-                            state.desired_position *= 0.5;
-                            state.desired_position.y *= -1.0;
+                            state.default_position *= 0.5;
+                            state.default_position.y *= -1.0;
+
+                            state.desired_position = state.default_position;
 
                             state.toasts.push(
                                 Toast::new(
@@ -276,7 +279,7 @@ fn bottom_bar(d: &mut RaylibDrawHandle, state: &mut UIState, cam: &Camera2D) {
         };
         
         if label_wrapper(d, recenter, recenter_tx, true) {
-            state.desired_position = Vector2{x: 0.0, y: 0.0};
+            state.desired_position = state.default_position;
         }
     }
 }
