@@ -9,7 +9,7 @@ use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteLayerFlags
 
 use super::ui_main::{FONT_SIZE_BIG, FONT_SIZE_REG, WINDOW_H};
 
-const GAP: u16 = 4;
+pub(crate) const GAP: u16 = 4;
 
 const SMALL_LINE_COLOR: Color = Color::WHITESMOKE;
 const BIG_LINE_COLOR:   Color = Color::GRAY;

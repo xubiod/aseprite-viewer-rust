@@ -4,7 +4,7 @@ use rand::Rng;
 use raylib::prelude::*;
 use raylib::{color::Color, math::Vector2};
 
-use super::loaded_aseprite::LoadedSprite;
+use super::loaded_aseprite::{LoadedSprite, GAP};
 use super::toast::Toast;
 use super::ui_traits::ExpirableElement;
 
@@ -98,15 +98,24 @@ pub fn ui() {
 
                             state.loaded_sprite = new.ok();
 
+                            let img_ref = state.loaded_sprite.as_ref().unwrap();
+
+                            state.desired_position = Vector2{
+                                x: (img_ref.frame_count + GAP as usize) as f32 * img_ref.main_data.header.pixel_width as f32 * img_ref.main_data.header.width as f32,
+                                y: (img_ref.loaded_layers.len() + GAP as usize) as f32 * img_ref.main_data.header.pixel_height as f32 * img_ref.main_data.header.height as f32,
+                            };
+
+                            state.desired_position *= 0.5;
+                            state.desired_position.y *= -1.0;
+
                             state.toasts.push(
                                 Toast::new(
                                 {
-                                        let r = state.loaded_sprite.as_ref().unwrap();
                                         format!(
                                             "file loaded successfully; {} cels, {} frames, {} layers",
-                                            r.loaded_cels.len(),
-                                            r.loaded_layers.len(),
-                                            r.frame_count,
+                                            img_ref.loaded_cels.len(),
+                                            img_ref.loaded_layers.len(),
+                                            img_ref.frame_count,
                                         ).as_str()
                                     },
                                     180
