@@ -263,8 +263,8 @@ impl LoadedSprite {
             };
 
             d.draw_rectangle_lines(
-                img.bounds.x as i32 + (img.frame_index as f32 * off.x as f32) as i32 - img.position.x as i32,
-                img.bounds.y as i32 - (img.layer_index as f32 * off.y as f32) as i32 - img.position.y as i32,
+                img.bounds.x as i32 + (img.frame_index as f32 * off.x) as i32 - img.position.x as i32,
+                img.bounds.y as i32 - (img.layer_index as f32 * off.y) as i32 - img.position.y as i32,
                 image_width as i32 * scale_x,
                 image_height as i32 * scale_y,
                 rect_colour
@@ -274,27 +274,27 @@ impl LoadedSprite {
                 if img.hover {
                     d.draw_line_ex(
                         Vector2{
-                            x: (img.frame_index as f32 * (off.x as f32 + 1.0) + (image_width as f32 / 2.0)), 
-                            y: (img.layer_index as f32 * (off.y as f32 + 1.0) - (image_height as f32 / 2.0)) * -1.0
+                            x: (img.frame_index as f32 * (off.x + 1.0) + (image_width as f32 / 2.0)), 
+                            y: (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0)) * -1.0
                         },
                         Vector2{
-                            x: (link as f32 * (off.x as f32 + 1.0) + (image_width as f32 / 2.0)),
-                            y: (img.layer_index as f32 * (off.y as f32 + 1.0) - (image_height as f32 / 2.0)) * -1.0
+                            x: (link as f32 * (off.x + 1.0) + (image_width as f32 / 2.0)),
+                            y: (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0)) * -1.0
                         },
                         3.0,
                         rect_colour
                     );
 
                     d.draw_circle(
-                        (link as f32 * (off.x as f32 + 1.0) + (image_width as f32 / 2.0)) as i32, 
-                        (img.layer_index as f32 * (off.y as f32 + 1.0) - (image_height as f32 / 2.0)) as i32 * -1, 
+                        (link as f32 * (off.x + 1.0) + (image_width as f32 / 2.0)) as i32, 
+                        (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0)) as i32 * -1, 
                         6.0 + f32::sin(d.get_time() as f32 * 1.7) * 2.4,
                         rect_colour
                     );
 
                     for i in 0..(img.frame_index as u16 - link) {
-                        let cx = ((link + i + 1) as f32 - d.get_time().fract() as f32) * (off.x as f32 + 1.0) + (image_width as f32 / 2.0);
-                        let cy = (img.layer_index as f32 * (off.y as f32 + 1.0) - (image_height as f32 / 2.0)) * -1.0;
+                        let cx = ((link + i + 1) as f32 - d.get_time().fract() as f32) * (off.x + 1.0) + (image_width as f32 / 2.0);
+                        let cy = (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0)) * -1.0;
                         let r = 3.5;
 
                         let v1 = Vector2{
@@ -325,8 +325,8 @@ impl LoadedSprite {
                     }
                 }
 
-                let tx = (img.frame_index as f32 * (off.x as f32 + 1.0) + (image_width as f32 / 2.0)) as i32;
-                let ty = (img.layer_index as f32 * (off.y as f32 + 1.0) - (image_height as f32 / 2.0) + 16.) as i32 * -1;
+                let tx = (img.frame_index as f32 * (off.x + 1.0) + (image_width as f32 / 2.0)) as i32;
+                let ty = (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0) + 16.) as i32 * -1;
                 
                 d.draw_text(
                     format!("{}", link).as_str(), 
@@ -344,8 +344,8 @@ impl LoadedSprite {
                         height: img.size.y,
                     }, 
                     Rectangle{
-                        x: (img.bounds.x + (img.frame_index as f32 * off.x as f32)) * scale_x as f32,
-                        y: (img.bounds.y - (img.layer_index as f32 * off.y as f32)) * scale_y as f32,
+                        x: (img.bounds.x + (img.frame_index as f32 * off.x)) * scale_x as f32,
+                        y: (img.bounds.y - (img.layer_index as f32 * off.y)) * scale_y as f32,
                         width: img.size.x * scale_x as f32,
                         height: img.size.y * scale_y as f32,
                     }, 
@@ -530,8 +530,8 @@ impl LoadedSprite {
 
         for img in &mut self.loaded_cels {
             let range = Rectangle{
-                x: (img.frame_index as f32 * off.x as f32) * scale_x as f32,
-                y: (img.layer_index as f32 * off.y as f32) * scale_y as f32 * -1.0,
+                x: (img.frame_index as f32 * off.x) * scale_x as f32,
+                y: (img.layer_index as f32 * off.y) * scale_y as f32 * -1.0,
                 width: header.width as f32 * scale_x as f32,
                 height: header.height as f32 * scale_y as f32,
             };
