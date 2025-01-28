@@ -495,8 +495,8 @@ impl LoadedSprite {
                 "Blend mode: {}\nOpacity: {}{}{}",
                 layer.blend_mode.to_string(), 
                 layer.opacity, 
-                if layer.background {"\nIs a background"} else {""},
-                if layer.is_reference {"\nIs a reference"} else {""},
+                if layer.background {"\nIs a background"} else {"\n"},
+                if layer.is_reference {"\nIs a reference"} else {"\n"},
             );
             
             d.gui_label(Rectangle{
