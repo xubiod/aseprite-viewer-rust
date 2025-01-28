@@ -122,16 +122,16 @@ impl LoadedSprite {
                 match chunk {
                     aseprite::Chunk::Layer(lchunk) => {
                         loaded_layers.push(PreparedLayer {
-                            child_level:    lchunk.child_level,
-                            blend_mode:     lchunk.blend_mode,
-                            opacity:        lchunk.opacity,
-                            visible:        lchunk.flags & AsepriteLayerFlags::Visible > 0,
-                            background:     lchunk.flags & AsepriteLayerFlags::Background > 0,
-                            is_reference:   lchunk.flags & AsepriteLayerFlags::IsReference > 0,
-                            name:           lchunk.name.as_str().unwrap().to_owned(),
-                            full_name:      None,
+                            child_level:  lchunk.child_level,
+                            blend_mode:   lchunk.blend_mode,
+                            opacity:      lchunk.opacity,
+                            visible:      lchunk.flags & AsepriteLayerFlags::Visible > 0,
+                            background:   lchunk.flags & AsepriteLayerFlags::Background > 0,
+                            is_reference: lchunk.flags & AsepriteLayerFlags::IsReference > 0,
+                            name:         lchunk.name.as_str().unwrap().to_owned(),
+                            full_name:    None,
 
-                            parent_index:   NO_PARENT,
+                            parent_index: NO_PARENT,
                         });
                     },
                     aseprite::Chunk::Cel(cel) => {
