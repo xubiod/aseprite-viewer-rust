@@ -540,7 +540,7 @@ impl LoadedSprite {
                 let effective_layer_active = (self.loaded_layers.len() - 1) - (self.layer_list_active as usize);
                 let prop_bounds = Rectangle{
                     x: self.layer_list_width + 8.,
-                    y: 0.0,
+                    y: 8.0,
                     width: 120.0,
                     height: 130.0,
                 };
