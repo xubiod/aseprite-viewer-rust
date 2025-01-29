@@ -246,10 +246,14 @@ fn label_wrapper(d: &mut RaylibDrawHandle, bounds: impl Into<ffi::Rectangle>, te
 fn bottom_bar(d: &mut RaylibDrawHandle, state: &mut UIState, cam: &Camera2D) {
     d.gui_panel(Rectangle{x: 0., y: (state.window_h - 24) as f32, width: state.window_w as f32, height: 24.}, None);
 
-    if label_wrapper(d, Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.}, "#107#", true) {
-        state.desired_zoom = state.fit_zoom.min(1.0f32);
-        state.desired_position = Vector2{x: 0., y: 0.};
-    }
+    match state.loaded_sprite {
+        Some(ref mut img) => {
+            if label_wrapper(d, Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.}, if img.layer_list_visible { "#197#" } else { "#196#" }, true) {
+                img.layer_list_visible ^= true;
+            }
+        },
+        None => { label_wrapper(d, Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.},  "#196#", false); },
+    };
 
     if label_wrapper(d, Rectangle{x: 28., y: (state.window_h - 24) as f32, width: 90., height: 24.},
                      format!("#43# {0:.2}%", cam.zoom * 100.).as_str(), true) {

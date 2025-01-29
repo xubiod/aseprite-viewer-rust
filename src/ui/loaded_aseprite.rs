@@ -80,7 +80,7 @@ pub(crate) struct LoadedSprite {
     pub loaded_tags:   Vec<PreparedTag>,
     pub frame_count:   usize,
 
-    layer_list_visible: bool,
+    pub layer_list_visible: bool,
     layer_list_width: f32,
     layer_list_resizing: bool,
     layer_list_scroll: i32,
