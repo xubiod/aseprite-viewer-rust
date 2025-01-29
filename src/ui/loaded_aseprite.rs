@@ -67,8 +67,9 @@ pub(crate) struct LoadedSprite {
     pub loaded_tags:   Vec<PreparedTag>,
     pub frame_count:   usize,
 
-    layer_scroll: i32,
-    layer_active: i32,
+    layer_list_visible: bool,
+    layer_list_scroll: i32,
+    layer_list_active: i32,
 }
 
 impl LoadedSprite {
@@ -223,7 +224,7 @@ impl LoadedSprite {
         }
 
         let frame_count = data.frames.len();
-        let mut r = Self { main_data: data, loaded_cels, loaded_layers, loaded_tags, frame_count, layer_scroll: 0, layer_active: 0 };
+        let mut r = Self { main_data: data, loaded_cels, loaded_layers, loaded_tags, frame_count, layer_list_scroll: 0, layer_list_active: 0, layer_list_visible: true };
 
         for layer_index in 0..r.loaded_layers.len() {
             r.loaded_layers[layer_index].full_name = Some(r.layer_name(layer_index))
@@ -453,67 +454,68 @@ impl LoadedSprite {
     }
 
     pub fn draw_ui(&mut self, d: &mut RaylibDrawHandle) {
-        let dd_str = CString::new(
-            <Vec<PreparedLayer> as AsRef<Vec<PreparedLayer>>>::as_ref(&self.loaded_layers)
-            .into_iter().rev()
-            .map(|i| {
-                format!("{} {}",
-                    if i.visible { "#44#" } else { "#45#" }, 
-                    i.full_name.as_ref().unwrap()
-                )
-            }).collect::<Vec<String>>().join(";").as_str()).unwrap();
-        
-        let dd_str = dd_str.as_c_str();
-        
-        let _ = d.gui_list_view(
-            Rectangle{
-                x: 0.0,
-                y: 0.0,
-                width: 120.0,
-                height: WINDOW_H as f32,
-            },
-            Some(dd_str), &mut self.layer_scroll, &mut self.layer_active
-        );
-
-        let effective_layer_active = (self.loaded_layers.len() - 1) - self.layer_active as usize;
-
-        {
-            let prop_bounds = Rectangle{
-                x: 128.0,
-                y: 0.0,
-                width: 120.0,
-                height: 130.0,
-            };
-
-            let layer_name = CString::new(self.loaded_layers[effective_layer_active].name.as_str()).unwrap();
-            let layer_name = layer_name.as_c_str();
-
-            let _ = d.gui_window_box(prop_bounds, Some(layer_name));
+        if self.layer_list_visible {
+            let dd_str = CString::new(
+                <Vec<PreparedLayer> as AsRef<Vec<PreparedLayer>>>::as_ref(&self.loaded_layers)
+                .into_iter().rev()
+                .map(|i| {
+                    format!("{} {}",
+                        if i.visible { "#44#" } else { "#45#" }, 
+                        i.full_name.as_ref().unwrap()
+                    )
+                }).collect::<Vec<String>>().join(";").as_str()).unwrap();
             
-            let layer = &self.loaded_layers[effective_layer_active];
-            let properties_contents = rstr!(
-                "Blend mode: {}\nOpacity: {}{}{}",
-                layer.blend_mode.to_string(), 
-                layer.opacity, 
-                if layer.background {"\nIs a background"} else {"\n"},
-                if layer.is_reference {"\nIs a reference"} else {"\n"},
+            let dd_str = dd_str.as_c_str();
+
+            let _ = d.gui_list_view(
+                Rectangle{
+                    x: 0.0,
+                    y: 0.0,
+                    width: 120.0,
+                    height: WINDOW_H as f32,
+                },
+                Some(dd_str), &mut self.layer_list_scroll, &mut self.layer_list_active
             );
-            
-            d.gui_label(Rectangle{
-                x: prop_bounds.x + 4.0,
-                y: prop_bounds.y + 24.0,
-                width: prop_bounds.width,
-                height: 72.0
-            }, Some(properties_contents.as_c_str()));
 
-            d.gui_check_box(Rectangle{
-                x: prop_bounds.x + 8.0,
-                y: prop_bounds.y + prop_bounds.height - 28.0,
-                width: 24.0,
-                height: 24.0,
-            }, Some(rstr!("Visible")), &mut self.loaded_layers[effective_layer_active].visible);
+            let effective_layer_active = (self.loaded_layers.len() - 1) - self.layer_list_active as usize;
+
+            {
+                let prop_bounds = Rectangle{
+                    x: 128.0,
+                    y: 0.0,
+                    width: 120.0,
+                    height: 130.0,
+                };
+
+                let layer_name = CString::new(self.loaded_layers[effective_layer_active].name.as_str()).unwrap();
+                let layer_name = layer_name.as_c_str();
+
+                let _ = d.gui_window_box(prop_bounds, Some(layer_name));
+                
+                let layer = &self.loaded_layers[effective_layer_active];
+                let properties_contents = rstr!(
+                    "Blend mode: {}\nOpacity: {}{}{}",
+                    layer.blend_mode.to_string(), 
+                    layer.opacity, 
+                    if layer.background {"\nIs a background"} else {"\n"},
+                    if layer.is_reference {"\nIs a reference"} else {"\n"},
+                );
+                
+                d.gui_label(Rectangle{
+                    x: prop_bounds.x + 4.0,
+                    y: prop_bounds.y + 24.0,
+                    width: prop_bounds.width,
+                    height: 72.0
+                }, Some(properties_contents.as_c_str()));
+
+                d.gui_check_box(Rectangle{
+                    x: prop_bounds.x + 8.0,
+                    y: prop_bounds.y + prop_bounds.height - 28.0,
+                    width: 24.0,
+                    height: 24.0,
+                }, Some(rstr!("Visible")), &mut self.loaded_layers[effective_layer_active].visible);
+            }
         }
-
     }
 
     pub fn step(&mut self, rl: &mut RaylibHandle, cam: &Camera2D) {
