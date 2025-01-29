@@ -520,7 +520,7 @@ impl LoadedSprite {
 
                 unsafe {
                     let arrows_height = (resize_area.height / 2.) as i32;
-                    
+
                     if self.layer_list_width > lo_resize_bound {
                         ffi::GuiDrawIcon(118, (resize_area.x - LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height, 1, LAYER_RESIZE_COLOUR.into());
                     }
@@ -536,9 +536,8 @@ impl LoadedSprite {
                 }
             }
 
-            let effective_layer_active = (self.loaded_layers.len() - 1) - self.layer_list_active as usize;
-
-            {
+            if self.layer_list_active > 0 && (self.layer_list_active as usize) < self.loaded_layers.len() {
+                let effective_layer_active = (self.loaded_layers.len() - 1) - (self.layer_list_active as usize);
                 let prop_bounds = Rectangle{
                     x: self.layer_list_width + 8.,
                     y: 0.0,
