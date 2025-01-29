@@ -22,6 +22,8 @@ const ERR_COLOR:        Color = Color::FUCHSIA;
 const NO_PARENT:       usize = usize::MAX;
 const RECURSIVE_LIMIT: u8    = 16;
 
+const LAYER_RESIZE_ICON_SPREAD: f32 = 8.0;
+
 pub struct PreparedCel {
     // image:       Option<Image>,
     texture:     Option<Texture2D>,
@@ -504,12 +506,11 @@ impl LoadedSprite {
                 }, resize_area.width / 4., Color::ORANGERED);
 
                 unsafe {
-                    const SPREAD: f32 = 8.0;
                     if self.layer_list_width > lo_resize_bound {
-                        ffi::GuiDrawIcon(118, (resize_area.x - SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
+                        ffi::GuiDrawIcon(118, (resize_area.x - LAYER_RESIZE_ICON_SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
                     }
                     if self.layer_list_width < hi_resize_bound {
-                        ffi::GuiDrawIcon(119, (resize_area.x + SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
+                        ffi::GuiDrawIcon(119, (resize_area.x + LAYER_RESIZE_ICON_SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
                     }
                 };
 
