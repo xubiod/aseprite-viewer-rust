@@ -160,25 +160,25 @@ impl From<u16> for AsepriteBlendMode {
 impl Display for AsepriteBlendMode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Normal =>     f.write_str("Normal"),
-            Self::Multiply =>   f.write_str("Multiply"),
-            Self::Screen =>     f.write_str("Screen"),
-            Self::Overlay =>    f.write_str("Overlay"),
-            Self::Darken =>     f.write_str("Darken"),
-            Self::Lighten =>    f.write_str("Lighten"),
+            Self::Normal     => f.write_str("Normal"),
+            Self::Multiply   => f.write_str("Multiply"),
+            Self::Screen     => f.write_str("Screen"),
+            Self::Overlay    => f.write_str("Overlay"),
+            Self::Darken     => f.write_str("Darken"),
+            Self::Lighten    => f.write_str("Lighten"),
             Self::ColorDodge => f.write_str("Color Dodge"),
-            Self::ColorBurn =>  f.write_str("Color Burn"),
-            Self::HardLight =>  f.write_str("Hard Light"),
-            Self::SoftLight =>  f.write_str("Soft Light"),
+            Self::ColorBurn  => f.write_str("Color Burn"),
+            Self::HardLight  => f.write_str("Hard Light"),
+            Self::SoftLight  => f.write_str("Soft Light"),
             Self::Difference => f.write_str("Difference"),
-            Self::Exclusion =>  f.write_str("Exclusion"),
-            Self::Hue =>        f.write_str("Hue"),
+            Self::Exclusion  => f.write_str("Exclusion"),
+            Self::Hue        => f.write_str("Hue"),
             Self::Saturation => f.write_str("Saturation"),
-            Self::Color =>      f.write_str("Color"),
+            Self::Color      => f.write_str("Color"),
             Self::Luminosity => f.write_str("Luminosity"),
-            Self::Addition =>   f.write_str("Addition"),
-            Self::Subtract =>   f.write_str("Subtract"),
-            Self::Divide =>     f.write_str("Divide"),
+            Self::Addition   => f.write_str("Addition"),
+            Self::Subtract   => f.write_str("Subtract"),
+            Self::Divide     => f.write_str("Divide"),
         }
     }
 }
@@ -219,13 +219,13 @@ pub struct AsepriteLayerChunk {
 
 #[repr(u16)]
 pub enum AsepriteLayerFlags {
-    Visible =           1,
-    Editable =          1 << 1,
-    LockMovement =      1 << 2,
-    Background =        1 << 3,
+    Visible           = 1,
+    Editable          = 1 << 1,
+    LockMovement      = 1 << 2,
+    Background        = 1 << 3,
     PreferLinkingCels = 1 << 4,
-    IsCollapsed =       1 << 5,
-    IsReference =       1 << 6,
+    IsCollapsed       = 1 << 5,
+    IsReference       = 1 << 6,
 }
 
 impl BitAnd<AsepriteLayerFlags> for u16 {
@@ -260,9 +260,9 @@ impl From<u16> for AsepriteCelType {
 impl Display for AsepriteCelType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Raw =>               f.write_str("Raw"),
-            Self::Linked =>            f.write_str("Linked"),
-            Self::CompressedImage =>   f.write_str("CompressedImage"),
+            Self::Raw               => f.write_str("Raw"),
+            Self::Linked            => f.write_str("Linked"),
+            Self::CompressedImage   => f.write_str("CompressedImage"),
             Self::CompressedTilemap => f.write_str("CompressedTilemap"),
         }
     }
@@ -319,9 +319,9 @@ impl From<u8> for AsepriteTagDirection {
 impl Display for AsepriteTagDirection {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Forward =>         f.write_str("Forward"),
-            Self::Reverse =>         f.write_str("Reverse"),
-            Self::PingPong =>        f.write_str("PingPong"),
+            Self::Forward         => f.write_str("Forward"),
+            Self::Reverse         => f.write_str("Reverse"),
+            Self::PingPong        => f.write_str("PingPong"),
             Self::PingPongReverse => f.write_str("PingPongReverse"),
         }
     }
