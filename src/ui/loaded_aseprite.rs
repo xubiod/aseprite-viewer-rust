@@ -33,7 +33,9 @@ const RECURSIVE_LIMIT: u8    = 16;
 
 /// The distance the GUI icons for signifying resizablity on the layer list should
 /// be from center.
-const LAYER_RESIZE_ICON_SPREAD: f32 = 8.0;
+const LAYER_RESIZE_ICON_SPREAD: f32   = 8.0;
+/// The colour of the resizing indicator and arrows for the layer list.
+const LAYER_RESIZE_COLOUR:      Color = Color::ORANGERED;
 
 pub struct PreparedCel {
     // image:       Option<Image>,
@@ -514,14 +516,16 @@ impl LoadedSprite {
                 }, Vector2{
                     x: resize_area.x + resize_area.width / 2.,
                     y: resize_area.y + resize_area.height
-                }, resize_area.width / 4., Color::ORANGERED);
+                }, resize_area.width / 4., LAYER_RESIZE_COLOUR);
 
                 unsafe {
+                    let arrows_height = (resize_area.height / 2.) as i32;
+                    
                     if self.layer_list_width > lo_resize_bound {
-                        ffi::GuiDrawIcon(118, (resize_area.x - LAYER_RESIZE_ICON_SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
+                        ffi::GuiDrawIcon(118, (resize_area.x - LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height, 1, LAYER_RESIZE_COLOUR.into());
                     }
                     if self.layer_list_width < hi_resize_bound {
-                        ffi::GuiDrawIcon(119, (resize_area.x + LAYER_RESIZE_ICON_SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
+                        ffi::GuiDrawIcon(119, (resize_area.x + LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height, 1, LAYER_RESIZE_COLOUR.into());
                     }
                 };
 
