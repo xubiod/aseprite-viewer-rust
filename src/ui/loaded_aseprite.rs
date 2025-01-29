@@ -490,6 +490,9 @@ impl LoadedSprite {
                 ..layer_list_rec
             };
 
+            let lo_resize_bound: f32 = 90.0;
+            let hi_resize_bound: f32 = d.get_screen_width() as f32 - 128.0;
+
             let m = d.get_mouse_position();
             if resize_area.check_collision_point_rec(m) || self.layer_list_resizing {
                 d.draw_line_ex(Vector2{
@@ -502,14 +505,18 @@ impl LoadedSprite {
 
                 unsafe {
                     const SPREAD: f32 = 8.0;
-                    ffi::GuiDrawIcon(118, (resize_area.x - SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
-                    ffi::GuiDrawIcon(119, (resize_area.x + SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
+                    if self.layer_list_width > lo_resize_bound {
+                        ffi::GuiDrawIcon(118, (resize_area.x - SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
+                    }
+                    if self.layer_list_width < hi_resize_bound {
+                        ffi::GuiDrawIcon(119, (resize_area.x + SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
+                    }
                 };
 
                 self.layer_list_resizing = d.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT);
 
                 if self.layer_list_resizing {
-                    self.layer_list_width = m.x.clamp(90.0, d.get_screen_width() as f32 - 128.0)
+                    self.layer_list_width = m.x.clamp(lo_resize_bound, hi_resize_bound)
                 }
             }
 
