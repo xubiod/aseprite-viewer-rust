@@ -263,8 +263,8 @@ impl LoadedSprite {
             };
 
             d.draw_rectangle_lines(
-                img.bounds.x as i32 + (img.frame_index as f32 * off.x) as i32 - img.position.x as i32,
-                img.bounds.y as i32 - (img.layer_index as f32 * off.y) as i32 - img.position.y as i32,
+                (img.bounds.x + img.frame_index as f32 * off.x) as i32 - img.position.x as i32,
+                (img.bounds.y - img.layer_index as f32 * off.y) as i32 - img.position.y as i32,
                 image_width as i32 * scale_x,
                 image_height as i32 * scale_y,
                 rect_colour
