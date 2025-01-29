@@ -548,7 +548,9 @@ impl LoadedSprite {
                 let layer_name = CString::new(self.loaded_layers[effective_layer_active].name.as_str()).unwrap();
                 let layer_name = layer_name.as_c_str();
 
-                let _ = d.gui_window_box(prop_bounds, Some(layer_name));
+                if d.gui_window_box(prop_bounds, Some(layer_name)) {
+                    self.layer_list_active = -1;
+                }
                 
                 let layer = &self.loaded_layers[effective_layer_active];
                 let properties_contents = rstr!(
