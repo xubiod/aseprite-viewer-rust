@@ -500,6 +500,12 @@ impl LoadedSprite {
                     y: resize_area.y + resize_area.height
                 }, resize_area.width / 4., Color::ORANGERED);
 
+                unsafe {
+                    const SPREAD: f32 = 8.0;
+                    ffi::GuiDrawIcon(118, (resize_area.x - SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
+                    ffi::GuiDrawIcon(119, (resize_area.x + SPREAD) as i32, (resize_area.height / 2.) as i32, 1, Color::ORANGERED.into());
+                };
+
                 self.layer_list_resizing = d.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT);
 
                 if self.layer_list_resizing {
