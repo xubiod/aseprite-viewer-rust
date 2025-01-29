@@ -9,19 +9,30 @@ use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteLayerFlags
 
 use super::ui_main::{FONT_SIZE_BIG, FONT_SIZE_REG, WINDOW_H};
 
+/// Used as the gap between cels on the grid.
 pub(crate) const GAP: u16 = 4;
 
+/// Used for the small lines separating the layers and frames, alpha is ignored.
 const SMALL_LINE_COLOR: Color = Color::WHITESMOKE;
+/// Used for the bigger lines between cells on the grid, alpha is ignored.
 const BIG_LINE_COLOR:   Color = Color::GRAY;
 
+/// Used for the layer names and frame numbers on the grid.
 const LABEL_COLOR:      Color = SMALL_LINE_COLOR;
 
+/// The colour used to signify linked cels and the animation pointing to the cel.
 const LINKED_COLOR:     Color = Color::ORANGERED;
+/// A generic error colour for trying to determine if something was drawn proper.
 const ERR_COLOR:        Color = Color::FUCHSIA;
 
+/// A general number to signify no parent. Should be the maximum for the type if
+/// unsigned, or a negative number for a signed type.
 const NO_PARENT:       usize = usize::MAX;
+/// How far the recursive functions can go until they stop.
 const RECURSIVE_LIMIT: u8    = 16;
 
+/// The distance the GUI icons for signifying resizablity on the layer list should
+/// be from center.
 const LAYER_RESIZE_ICON_SPREAD: f32 = 8.0;
 
 pub struct PreparedCel {
