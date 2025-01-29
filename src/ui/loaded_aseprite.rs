@@ -68,6 +68,8 @@ pub(crate) struct LoadedSprite {
     pub frame_count:   usize,
 
     layer_list_visible: bool,
+    layer_list_width: f32,
+    layer_list_resizing: bool,
     layer_list_scroll: i32,
     layer_list_active: i32,
 }
@@ -224,7 +226,11 @@ impl LoadedSprite {
         }
 
         let frame_count = data.frames.len();
-        let mut r = Self { main_data: data, loaded_cels, loaded_layers, loaded_tags, frame_count, layer_list_scroll: 0, layer_list_active: 0, layer_list_visible: true };
+        let mut r = Self {
+            main_data: data,
+            loaded_cels, loaded_layers, loaded_tags, frame_count, 
+            layer_list_scroll: 0, layer_list_active: 0, layer_list_visible: true, layer_list_width: 120.0, layer_list_resizing: false,
+        };
 
         for layer_index in 0..r.loaded_layers.len() {
             r.loaded_layers[layer_index].full_name = Some(r.layer_name(layer_index))
@@ -467,21 +473,45 @@ impl LoadedSprite {
             
             let dd_str = dd_str.as_c_str();
 
+            let layer_list_rec = Rectangle{
+                x: 0.0,
+                y: 0.0,
+                width: self.layer_list_width,
+                height: WINDOW_H as f32,
+            };
+
             let _ = d.gui_list_view(
-                Rectangle{
-                    x: 0.0,
-                    y: 0.0,
-                    width: 120.0,
-                    height: WINDOW_H as f32,
-                },
-                Some(dd_str), &mut self.layer_list_scroll, &mut self.layer_list_active
+                layer_list_rec, Some(dd_str), &mut self.layer_list_scroll, &mut self.layer_list_active
             );
+
+            let resize_area = Rectangle{
+                x: layer_list_rec.width - 8.0,
+                width: 16.0,
+                ..layer_list_rec
+            };
+
+            let m = d.get_mouse_position();
+            if resize_area.check_collision_point_rec(m) || self.layer_list_resizing {
+                d.draw_line_ex(Vector2{
+                    x: resize_area.x + resize_area.width / 2.,
+                    y: resize_area.y
+                }, Vector2{
+                    x: resize_area.x + resize_area.width / 2.,
+                    y: resize_area.y + resize_area.height
+                }, resize_area.width / 4., Color::ORANGERED);
+
+                self.layer_list_resizing = d.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT);
+
+                if self.layer_list_resizing {
+                    self.layer_list_width = m.x.clamp(90.0, d.get_screen_width() as f32 - 128.0)
+                }
+            }
 
             let effective_layer_active = (self.loaded_layers.len() - 1) - self.layer_list_active as usize;
 
             {
                 let prop_bounds = Rectangle{
-                    x: 128.0,
+                    x: self.layer_list_width + 8.,
                     y: 0.0,
                     width: 120.0,
                     height: 130.0,
