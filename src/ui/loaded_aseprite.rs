@@ -244,7 +244,7 @@ impl LoadedSprite {
         let mut r = Self {
             main_data: data,
             loaded_cels, loaded_layers, loaded_tags, frame_count, 
-            layer_list_scroll: 0, layer_list_active: 0, layer_list_visible: true, layer_list_width: 120.0, layer_list_resizing: false,
+            layer_list_scroll: 0, layer_list_active: -1, layer_list_visible: true, layer_list_width: 120.0, layer_list_resizing: false,
         };
 
         for layer_index in 0..r.loaded_layers.len() {
