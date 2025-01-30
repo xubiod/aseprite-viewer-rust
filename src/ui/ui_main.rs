@@ -87,8 +87,7 @@ pub fn ui() {
             if rl.is_file_dropped() {
                 let list = rl.load_dropped_files();
 
-                for fidx in 0..list.count {
-                    let fname = list.paths()[fidx as usize];
+                for fname in list.paths() {
                     for ext in ACCEPTED_TYPES {
                         if rl.is_file_extension(fname, ext) {
                             let new = LoadedSprite::load(

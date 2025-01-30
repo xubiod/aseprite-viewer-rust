@@ -134,9 +134,8 @@ impl LoadedSprite {
         let mut loaded_layers = vec![];
         let mut loaded_tags = vec![];
 
-        for frame_idx in 0..data.frames.len() {
-            let frame = &mut data.frames[frame_idx];
-            for chunk in &mut frame.chunks {
+        for (frame_idx, frame) in data.frames.iter_mut().enumerate() {
+            for (chunk_idx, chunk) in frame.chunks.iter_mut().enumerate() {
                 match chunk {
                     aseprite::Chunk::Layer(lchunk) => {
                         loaded_layers.push(PreparedLayer {
@@ -270,8 +269,7 @@ impl LoadedSprite {
             y: (image_height * scale_y as u16 + GAP) as f32
         };
 
-        for i in 0..self.loaded_cels.len() {
-            let img = &self.loaded_cels[i];
+        for img in self.loaded_cels.iter() {
             let my_layer = &self.loaded_layers[img.layer_index as usize];
 
             if !self.is_layer_visible(img.layer_index as usize) {
@@ -386,8 +384,7 @@ impl LoadedSprite {
 
         let line_alpha = (24. * cam.zoom).clamp(0., 255.) as u8;
 
-        for i in 0..self.loaded_layers.len() {
-            let l = &self.loaded_layers[i];
+        for (i, l) in self.loaded_layers.iter().enumerate() {
             let m = d.measure_text(&l.name, FONT_SIZE_REG);
             let my_alpha = line_alpha / if l.visible { 1 } else { 2 };
 
