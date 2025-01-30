@@ -235,7 +235,7 @@ impl LoadedSprite {
 
             for layer_idx in 0..loaded_layers.len() {
                 let layer = &mut loaded_layers[layer_idx];
-                parent_map.insert(layer_idx as i32, layer_idx);
+                parent_map.insert(layer.child_level as i32, layer_idx);
 
                 layer.parent_index = *parent_map.get(&((layer.child_level as i32) - 1)).unwrap_or(&NO_PARENT);
             }
