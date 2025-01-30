@@ -480,7 +480,7 @@ impl LoadedSprite {
                 .map(|i| {
                     format!("{} {}",
                         match i.layer_type {
-                            AsepriteLayerType::Normal  => if i.visible { "#44#" } else { "#45#" },
+                            AsepriteLayerType::Normal  => if i.visible { if i.is_reference { "#15#" } else { "#44#" } } else { "#45#" },
                             AsepriteLayerType::Group   => if i.visible { "#217#" } else { "#45#" },
                             AsepriteLayerType::Tilemap => if i.visible { "#97#" } else { "#45#" },
                         },
