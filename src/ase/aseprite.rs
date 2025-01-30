@@ -184,7 +184,7 @@ impl Display for AsepriteBlendMode {
 }
 
 #[repr(u16)]
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 pub enum AsepriteLayerType {
     Normal = 0,
     Group,

@@ -5,7 +5,7 @@ use std::{f32::consts::FRAC_PI_3, ffi::CString, fs::File};
 use raylib::prelude::*;
 use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, rgui::RaylibDrawGui, texture::{RaylibTexture2D, Texture2D}, RaylibHandle, RaylibThread};
 
-use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteLayerFlags, AsepriteTagDirection};
+use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteLayerFlags, AsepriteLayerType, AsepriteTagDirection};
 
 use super::ui_main::{FONT_SIZE_BIG, FONT_SIZE_REG, WINDOW_H};
 
@@ -58,6 +58,7 @@ pub struct PreparedLayer {
     blend_mode:   AsepriteBlendMode,
     opacity:      u8,
     name:         String,
+    layer_type:   AsepriteLayerType,
 
     visible:      bool,
     background:   bool,
@@ -142,6 +143,7 @@ impl LoadedSprite {
                             child_level:  lchunk.child_level,
                             blend_mode:   lchunk.blend_mode,
                             opacity:      lchunk.opacity,
+                            layer_type:   lchunk.layer_type,
                             visible:      lchunk.flags & AsepriteLayerFlags::Visible > 0,
                             background:   lchunk.flags & AsepriteLayerFlags::Background > 0,
                             is_reference: lchunk.flags & AsepriteLayerFlags::IsReference > 0,
@@ -477,7 +479,11 @@ impl LoadedSprite {
             let dd_str = CString::new(self.loaded_layers.iter().rev()
                 .map(|i| {
                     format!("{} {}",
-                        if i.visible { "#44#" } else { "#45#" }, 
+                        match i.layer_type {
+                            AsepriteLayerType::Normal  => if i.visible { "#44#" } else { "#45#" },
+                            AsepriteLayerType::Group   => if i.visible { "#217#" } else { "#45#" },
+                            AsepriteLayerType::Tilemap => if i.visible { "#97#" } else { "#45#" },
+                        },
                         i.full_name.as_ref().unwrap()
                     )
                 }).collect::<Vec<String>>().join(";").as_str()).ok().unwrap();
