@@ -14,6 +14,12 @@ const MAX_ZOOM_IN: f32 = 0.10;
 pub(crate) const FONT_SIZE_REG: i32 = 10;
 pub(crate) const FONT_SIZE_BIG: i32 = FONT_SIZE_REG * 2;
 
+/// The distance the GUI icons for signifying resizablity on the layer list should
+/// be from center.
+const LAYER_RESIZE_ICON_SPREAD: f32   = 8.0;
+/// The colour of the resizing indicator and arrows for the layer list.
+const LAYER_RESIZE_COLOUR:      Color = Color::ORANGERED;
+
 struct Part {
     pos: Vector2,
     spd: f32
@@ -35,7 +41,13 @@ pub struct UIState {
     pub window_w: i32,
     pub window_h: i32,
 
-    particles: Vec<Part>
+    particles: Vec<Part>,
+
+    pub layer_list_visible: bool,
+    layer_list_width: f32,
+    layer_list_resizing: bool,
+    layer_list_scroll: i32,
+    layer_list_active: i32,
 }
 
 const ACCEPTED_TYPES: [&str; 2] = [".ase", ".aseprite"];
@@ -55,6 +67,9 @@ pub fn ui() {
         desired_position: Vector2{x: 0., y: 0.},
         window_w: WINDOW_W,
         window_h: WINDOW_H,
+
+        layer_list_active: -1,
+        layer_list_width: 120.0,
         ..Default::default()
     };
 
@@ -96,6 +111,7 @@ pub fn ui() {
                                 &thread
                             );
 
+                            state.layer_list_visible = state.loaded_sprite.is_none() || state.layer_list_visible;
                             state.loaded_sprite = new.ok();
 
                             let img_ref = state.loaded_sprite.as_ref().unwrap();
@@ -191,7 +207,7 @@ pub fn ui() {
             // draw screenspace
             {
                 match state.loaded_sprite {
-                    Some(ref mut img) => img.draw_ui(&mut d),
+                    Some(_) => { layer_list(&mut d, &mut state); },
                     None => {
                         let tx = "drag and drop an aseprite file..";
                         let tx_w = d.measure_text(tx,FONT_SIZE_BIG);
@@ -242,13 +258,110 @@ fn label_wrapper(d: &mut RaylibDrawHandle, bounds: impl Into<ffi::Rectangle>, te
     }
 }
 
+fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
+    if let Some(ref mut loaded) = state.loaded_sprite {
+        if state.layer_list_visible {
+            let dd_str = loaded.generate_layer_list();
+            let dd_str = dd_str.as_c_str();
+
+            let layer_list_rec = Rectangle{
+                x: 0.0,
+                y: 0.0,
+                width: state.layer_list_width,
+                height: WINDOW_H as f32,
+            };
+
+            let _ = d.gui_list_view(
+                layer_list_rec, Some(dd_str), &mut state.layer_list_scroll, &mut state.layer_list_active
+            );
+
+            let resize_area = Rectangle{
+                x: layer_list_rec.width - 8.0,
+                width: 16.0,
+                ..layer_list_rec
+            };
+
+            let lo_resize_bound: f32 = 90.0;
+            let hi_resize_bound: f32 = d.get_screen_width() as f32 - 128.0;
+
+            let m = d.get_mouse_position();
+            if resize_area.check_collision_point_rec(m) || state.layer_list_resizing {
+                d.draw_line_ex(Vector2{
+                    x: resize_area.x + resize_area.width / 2.,
+                    y: resize_area.y
+                }, Vector2{
+                    x: resize_area.x + resize_area.width / 2.,
+                    y: resize_area.y + resize_area.height
+                }, resize_area.width / 4., LAYER_RESIZE_COLOUR);
+
+                unsafe {
+                    let arrows_height = (resize_area.height / 2.) as i32;
+
+                    if state.layer_list_width > lo_resize_bound {
+                        ffi::GuiDrawIcon(118, (resize_area.x - LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height, 1, LAYER_RESIZE_COLOUR.into());
+                    }
+                    if state.layer_list_width < hi_resize_bound {
+                        ffi::GuiDrawIcon(119, (resize_area.x + LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height, 1, LAYER_RESIZE_COLOUR.into());
+                    }
+                };
+
+                state.layer_list_resizing = d.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT);
+
+                if state.layer_list_resizing {
+                    state.layer_list_width = m.x.clamp(lo_resize_bound, hi_resize_bound)
+                }
+            }
+
+            if state.layer_list_active >= 0 && (state.layer_list_active as usize) < loaded.loaded_layers.len() {
+                let effective_layer_active = (loaded.loaded_layers.len() - 1) - (state.layer_list_active as usize);
+                let prop_bounds = Rectangle{
+                    x: state.layer_list_width + 8.,
+                    y: 8.0,
+                    width: 120.0,
+                    height: 130.0,
+                };
+
+                let layer_name = CString::new(loaded.loaded_layers[effective_layer_active].name.as_str()).unwrap();
+                let layer_name = layer_name.as_c_str();
+
+                if d.gui_window_box(prop_bounds, Some(layer_name)) {
+                    state.layer_list_active = -1;
+                }
+                
+                let layer = &loaded.loaded_layers[effective_layer_active];
+                let properties_contents = rstr!(
+                    "Blend mode: {}\nOpacity: {}{}{}",
+                    layer.blend_mode.to_string(), 
+                    layer.opacity, 
+                    if layer.background {"\nIs a background"} else {"\n"},
+                    if layer.is_reference {"\nIs a reference"} else {"\n"},
+                );
+                
+                d.gui_label(Rectangle{
+                    x: prop_bounds.x + 4.0,
+                    y: prop_bounds.y + 24.0,
+                    width: prop_bounds.width,
+                    height: 72.0
+                }, Some(properties_contents.as_c_str()));
+
+                d.gui_check_box(Rectangle{
+                    x: prop_bounds.x + 8.0,
+                    y: prop_bounds.y + prop_bounds.height - 28.0,
+                    width: 24.0,
+                    height: 24.0,
+                }, Some(rstr!("Visible")), &mut loaded.loaded_layers[effective_layer_active].visible);
+            }
+        }
+    }
+}
+
 fn bottom_bar(d: &mut RaylibDrawHandle, state: &mut UIState, cam: &Camera2D) {
     d.gui_panel(Rectangle{x: 0., y: (state.window_h - 24) as f32, width: state.window_w as f32, height: 24.}, None);
 
     match state.loaded_sprite {
-        Some(ref mut img) => {
-            if label_wrapper(d, Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.}, if img.layer_list_visible { "#197#" } else { "#196#" }, true) {
-                img.layer_list_visible ^= true;
+        Some(_) => {
+            if label_wrapper(d, Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.}, if state.layer_list_visible { "#197#" } else { "#196#" }, true) {
+                state.layer_list_visible ^= true;
             }
         },
         None => { label_wrapper(d, Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.},  "#196#", false); },

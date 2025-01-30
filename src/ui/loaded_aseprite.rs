@@ -3,11 +3,11 @@ use std::usize;
 use std::{f32::consts::FRAC_PI_3, ffi::CString, fs::File};
 
 use raylib::prelude::*;
-use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, rgui::RaylibDrawGui, texture::{RaylibTexture2D, Texture2D}, RaylibHandle, RaylibThread};
+use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, texture::{RaylibTexture2D, Texture2D}, RaylibHandle, RaylibThread};
 
 use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteLayerFlags, AsepriteLayerType, AsepriteTagDirection};
 
-use super::ui_main::{FONT_SIZE_BIG, FONT_SIZE_REG, WINDOW_H};
+use super::ui_main::{FONT_SIZE_BIG, FONT_SIZE_REG};
 
 /// Used as the gap between cels on the grid.
 pub(crate) const GAP: u16 = 4;
@@ -31,12 +31,6 @@ const NO_PARENT:       usize = usize::MAX;
 /// How far the recursive functions can go until they stop.
 const RECURSIVE_LIMIT: u8    = 16;
 
-/// The distance the GUI icons for signifying resizablity on the layer list should
-/// be from center.
-const LAYER_RESIZE_ICON_SPREAD: f32   = 8.0;
-/// The colour of the resizing indicator and arrows for the layer list.
-const LAYER_RESIZE_COLOUR:      Color = Color::ORANGERED;
-
 pub struct PreparedCel {
     // image:       Option<Image>,
     texture:     Option<Texture2D>,
@@ -54,18 +48,18 @@ pub struct PreparedCel {
 }
 
 pub struct PreparedLayer {
-    child_level:  u16,
-    blend_mode:   AsepriteBlendMode,
-    opacity:      u8,
-    name:         String,
-    layer_type:   AsepriteLayerType,
+    pub child_level:  u16,
+    pub blend_mode:   AsepriteBlendMode,
+    pub opacity:      u8,
+    pub name:         String,
+    pub layer_type:   AsepriteLayerType,
 
-    visible:      bool,
-    background:   bool,
-    is_reference: bool,
+    pub visible:      bool,
+    pub background:   bool,
+    pub is_reference: bool,
 
-    parent_index: usize,
-    full_name:    Option<String>
+    pub parent_index: usize,
+    pub full_name:    Option<String>
 }
 
 pub struct PreparedTag {
@@ -81,13 +75,7 @@ pub(crate) struct LoadedSprite {
     pub loaded_cels:   Vec<PreparedCel>,
     pub loaded_layers: Vec<PreparedLayer>,
     pub loaded_tags:   Vec<PreparedTag>,
-    pub frame_count:   usize,
-
-    pub layer_list_visible: bool,
-    layer_list_width: f32,
-    layer_list_resizing: bool,
-    layer_list_scroll: i32,
-    layer_list_active: i32,
+    pub frame_count:   usize
 }
 
 impl LoadedSprite {
@@ -243,10 +231,7 @@ impl LoadedSprite {
 
         let frame_count = main_data.frames.len();
         let mut r = Self {
-            main_data, loaded_cels, loaded_layers, loaded_tags, frame_count, 
-
-            layer_list_visible: true, layer_list_width: 120.0, layer_list_resizing: false,
-            layer_list_scroll: 0, layer_list_active: -1, 
+            main_data, loaded_cels, loaded_layers, loaded_tags, frame_count
         };
 
         for layer_index in 0..r.loaded_layers.len() {
@@ -474,112 +459,6 @@ impl LoadedSprite {
         }
     }
 
-    pub fn draw_ui(&mut self, d: &mut RaylibDrawHandle) {
-        if self.layer_list_visible {
-            let dd_str = CString::new(self.loaded_layers.iter().rev()
-                .map(|i| {
-                    format!("{} {}",
-                        match i.layer_type {
-                            AsepriteLayerType::Normal  => if i.visible { if i.is_reference { "#15#" } else { "#44#" } } else { "#45#" },
-                            AsepriteLayerType::Group   => if i.visible { "#217#" } else { "#45#" },
-                            AsepriteLayerType::Tilemap => if i.visible { "#97#" } else { "#45#" },
-                        },
-                        i.full_name.as_ref().unwrap()
-                    )
-                }).collect::<Vec<String>>().join(";").as_str()).ok().unwrap();
-            
-            let dd_str = dd_str.as_c_str();
-
-            let layer_list_rec = Rectangle{
-                x: 0.0,
-                y: 0.0,
-                width: self.layer_list_width,
-                height: WINDOW_H as f32,
-            };
-
-            let _ = d.gui_list_view(
-                layer_list_rec, Some(dd_str), &mut self.layer_list_scroll, &mut self.layer_list_active
-            );
-
-            let resize_area = Rectangle{
-                x: layer_list_rec.width - 8.0,
-                width: 16.0,
-                ..layer_list_rec
-            };
-
-            let lo_resize_bound: f32 = 90.0;
-            let hi_resize_bound: f32 = d.get_screen_width() as f32 - 128.0;
-
-            let m = d.get_mouse_position();
-            if resize_area.check_collision_point_rec(m) || self.layer_list_resizing {
-                d.draw_line_ex(Vector2{
-                    x: resize_area.x + resize_area.width / 2.,
-                    y: resize_area.y
-                }, Vector2{
-                    x: resize_area.x + resize_area.width / 2.,
-                    y: resize_area.y + resize_area.height
-                }, resize_area.width / 4., LAYER_RESIZE_COLOUR);
-
-                unsafe {
-                    let arrows_height = (resize_area.height / 2.) as i32;
-
-                    if self.layer_list_width > lo_resize_bound {
-                        ffi::GuiDrawIcon(118, (resize_area.x - LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height, 1, LAYER_RESIZE_COLOUR.into());
-                    }
-                    if self.layer_list_width < hi_resize_bound {
-                        ffi::GuiDrawIcon(119, (resize_area.x + LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height, 1, LAYER_RESIZE_COLOUR.into());
-                    }
-                };
-
-                self.layer_list_resizing = d.is_mouse_button_down(MouseButton::MOUSE_BUTTON_LEFT);
-
-                if self.layer_list_resizing {
-                    self.layer_list_width = m.x.clamp(lo_resize_bound, hi_resize_bound)
-                }
-            }
-
-            if self.layer_list_active > 0 && (self.layer_list_active as usize) < self.loaded_layers.len() {
-                let effective_layer_active = (self.loaded_layers.len() - 1) - (self.layer_list_active as usize);
-                let prop_bounds = Rectangle{
-                    x: self.layer_list_width + 8.,
-                    y: 8.0,
-                    width: 120.0,
-                    height: 130.0,
-                };
-
-                let layer_name = CString::new(self.loaded_layers[effective_layer_active].name.as_str()).unwrap();
-                let layer_name = layer_name.as_c_str();
-
-                if d.gui_window_box(prop_bounds, Some(layer_name)) {
-                    self.layer_list_active = -1;
-                }
-                
-                let layer = &self.loaded_layers[effective_layer_active];
-                let properties_contents = rstr!(
-                    "Blend mode: {}\nOpacity: {}{}{}",
-                    layer.blend_mode.to_string(), 
-                    layer.opacity, 
-                    if layer.background {"\nIs a background"} else {"\n"},
-                    if layer.is_reference {"\nIs a reference"} else {"\n"},
-                );
-                
-                d.gui_label(Rectangle{
-                    x: prop_bounds.x + 4.0,
-                    y: prop_bounds.y + 24.0,
-                    width: prop_bounds.width,
-                    height: 72.0
-                }, Some(properties_contents.as_c_str()));
-
-                d.gui_check_box(Rectangle{
-                    x: prop_bounds.x + 8.0,
-                    y: prop_bounds.y + prop_bounds.height - 28.0,
-                    width: 24.0,
-                    height: 24.0,
-                }, Some(rstr!("Visible")), &mut self.loaded_layers[effective_layer_active].visible);
-            }
-        }
-    }
-
     pub fn step(&mut self, rl: &mut RaylibHandle, cam: &Camera2D) {
         let header = &self.main_data.header;
         let mouse_pt = rl.get_screen_to_world2D(rl.get_mouse_position(), cam);
@@ -602,5 +481,19 @@ impl LoadedSprite {
 
             img.hover = range.check_collision_point_rec(mouse_pt);
         }
+    }
+
+    pub fn generate_layer_list(&self) -> CString {
+        CString::new(self.loaded_layers.iter().rev()
+            .map(|i| {
+                format!("{} {}",
+                    match i.layer_type {
+                        AsepriteLayerType::Normal  => if i.visible { if i.is_reference { "#15#" } else { "#44#" } } else { "#45#" },
+                        AsepriteLayerType::Group   => if i.visible { "#217#" } else { "#45#" },
+                        AsepriteLayerType::Tilemap => if i.visible { "#97#" } else { "#45#" },
+                    },
+                    i.full_name.as_ref().unwrap()
+                )
+            }).collect::<Vec<String>>().join(";").as_str()).ok().unwrap()
     }
 }
