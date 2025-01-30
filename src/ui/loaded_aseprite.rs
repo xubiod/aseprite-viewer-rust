@@ -474,15 +474,13 @@ impl LoadedSprite {
 
     pub fn draw_ui(&mut self, d: &mut RaylibDrawHandle) {
         if self.layer_list_visible {
-            let dd_str = CString::new(
-                <Vec<PreparedLayer> as AsRef<Vec<PreparedLayer>>>::as_ref(&self.loaded_layers)
-                .into_iter().rev()
+            let dd_str = CString::new(self.loaded_layers.iter().rev()
                 .map(|i| {
                     format!("{} {}",
                         if i.visible { "#44#" } else { "#45#" }, 
                         i.full_name.as_ref().unwrap()
                     )
-                }).collect::<Vec<String>>().join(";").as_str()).unwrap();
+                }).collect::<Vec<String>>().join(";").as_str()).ok().unwrap();
             
             let dd_str = dd_str.as_c_str();
 
