@@ -128,13 +128,13 @@ impl LoadedSprite {
     pub fn load(fname: &str, rl: &mut RaylibHandle, thread: &RaylibThread) -> Result<Self, ()> {
         let mut f_in = File::open(fname).unwrap();
     
-        let mut data = aseprite::read(&mut f_in).unwrap();
+        let mut main_data = aseprite::read(&mut f_in).unwrap();
 
         let mut loaded_cels = vec![];
         let mut loaded_layers = vec![];
         let mut loaded_tags = vec![];
 
-        for (frame_idx, frame) in data.frames.iter_mut().enumerate() {
+        for (frame_idx, frame) in main_data.frames.iter_mut().enumerate() {
             for (chunk_idx, chunk) in frame.chunks.iter_mut().enumerate() {
                 match chunk {
                     aseprite::Chunk::Layer(lchunk) => {
@@ -160,7 +160,7 @@ impl LoadedSprite {
                                         ERR_COLOR
                                     );
                                     
-                                    img.set_format(match &data.header.colour_depth {
+                                    img.set_format(match &main_data.header.colour_depth {
                                         32 => raylib::consts::PixelFormat::PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
                                         16 => raylib::consts::PixelFormat::PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA,
                                         _ => panic!("unsupported colour depth")
@@ -196,13 +196,13 @@ impl LoadedSprite {
                                     texture:         None,
                                     linked_to_frame: cel.linked_to,
                                     position:        Vector2 { x: 0.0, y: 0.0 },
-                                    size:            Vector2 { x: data.header.width as f32, y: data.header.height as f32 },
+                                    size:            Vector2 { x: main_data.header.width as f32, y: main_data.header.height as f32 },
                                     opacity:         255,
                                     bounds:          Rectangle {
                                         x: frame_idx as f32,
                                         y: cel.layer_index as f32 * -1.0,
-                                        width: data.header.width as f32,
-                                        height: data.header.height as f32
+                                        width: main_data.header.width as f32,
+                                        height: main_data.header.height as f32
                                     },
                                     hover: false
                                 });
@@ -239,10 +239,9 @@ impl LoadedSprite {
             }
         }
 
-        let frame_count = data.frames.len();
+        let frame_count = main_data.frames.len();
         let mut r = Self {
-            main_data: data,
-            loaded_cels, loaded_layers, loaded_tags, frame_count, 
+            main_data, loaded_cels, loaded_layers, loaded_tags, frame_count, 
 
             layer_list_visible: true, layer_list_width: 120.0, layer_list_resizing: false,
             layer_list_scroll: 0, layer_list_active: -1, 
