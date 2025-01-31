@@ -23,6 +23,20 @@ Main motivations behind this project have been:
 - Learn Raylib through the [raylib-rs crate](https://crates.io/crates/raylib)
   - By extension rgui
 
+## Building
+
+There shouldn't be more needed than the standard:
+
+```
+cargo build
+```
+
+To build and run:
+
+```
+cargo run
+```
+
 ## License
 
 This source code is licensed under [MIT](LICENSE).
