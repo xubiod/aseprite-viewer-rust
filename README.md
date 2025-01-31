@@ -1,4 +1,4 @@
-<div style="text-align: center">
+<div style="text-align: center" align="center">
 <h1>Another Aseprite Viewer</h1>
 <h3>Written in Rust with the use of <a href="http://raylib.com/" rel="noreferrer noopener" target="_blank">Raylib</a></h3>
 </div>
