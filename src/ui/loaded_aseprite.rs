@@ -371,7 +371,7 @@ impl LoadedSprite {
         let line_alpha = (24. * cam.zoom).clamp(0., 255.) as u8;
 
         for (i, l) in self.loaded_layers.iter().enumerate() {
-            let m = d.measure_text(&l.name, FONT_SIZE_REG);
+            let m = d.measure_text(&l.full_name.as_ref().unwrap(), FONT_SIZE_REG);
             let my_alpha = line_alpha / if l.visible { 1 } else { 2 };
 
             d.draw_text(
