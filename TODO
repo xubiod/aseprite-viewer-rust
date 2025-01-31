@@ -1,2 +1,3 @@
 [X] Move layer list out of LoadedSprite
+[ ] Make Aseprite module have a dedicated error type for diagnosing errors in loading
 [ ] Have tags do something in the UI
