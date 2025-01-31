@@ -3,3 +3,5 @@
 
 *.txt
 *.aseprite
+
+flamegraph.svg

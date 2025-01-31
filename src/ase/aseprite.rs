@@ -1,4 +1,4 @@
-use std::{fmt::Display, io::{self, Read}, ops::BitAnd, rc::Rc};
+use std::{error::Error, fmt::Display, io::{self, Read}, ops::BitAnd, rc::Rc};
 use flate2::bufread::ZlibDecoder;
 
 /// Makes a type from a slice of little endian bytes. If it fails, it spits out 0.
@@ -346,14 +346,43 @@ pub struct AsepriteTag {
     pub name: AsepriteString
 }
 
-pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, ()> {
+#[derive(Debug)]
+pub enum AsepriteError {
+    RanOutAtHeader,
+    HeaderMagicMismatch,
+    FrameMagicMismatch,
+    Other(Box<dyn Error>)
+}
+
+impl Error for AsepriteError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match self {
+            Self::Other(e) => Some(e.as_ref()),
+            _ => None
+        }
+    }
+}
+
+impl Display for AsepriteError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AsepriteError::RanOutAtHeader      => f.write_str("header could not be read"),
+            AsepriteError::HeaderMagicMismatch => f.write_str("header magic number did not match"),
+            AsepriteError::FrameMagicMismatch  => f.write_str("frame magic number did not match"),
+
+            AsepriteError::Other(error) => f.write_str(&error.to_string()),
+        }
+    }
+}
+
+pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteError> {
     let mut header: Vec<u8> = vec![];
     header.reserve(size_of::<AsepriteHeader>());
     header.resize(header.capacity(), 0);
     
     match from.read(&mut header) {
-        Ok(count) => if count != size_of::<AsepriteHeader>() { return Err(()) },
-        Err(_e) => return Err(())
+        Ok(count) => if count != size_of::<AsepriteHeader>() { return Err(AsepriteError::RanOutAtHeader) },
+        Err(e) => return Err(AsepriteError::Other(Box::new(e)))
     };
     
     let mut result = Aseprite{
@@ -382,7 +411,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, ()> {
     };
 
     if result.header.magic != ASEPRITE_MAGIC_HEADER {
-        return Err(());
+        return Err(AsepriteError::HeaderMagicMismatch);
     }
 
     let mut frame_buffer: Vec<u8> = vec![];
@@ -407,7 +436,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, ()> {
         };
 
         if frame.magic != ASEPRITE_MAGIC_FRAMES {
-            return Err(());
+            return Err(AsepriteError::FrameMagicMismatch);
         }
 
         let frames_end = from.stream_position().unwrap_or_default() + frame.size as u64;
@@ -515,7 +544,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, ()> {
                                     let mut r = vec![];
                                     match z.read_to_end(&mut r) {
                                         Ok(_) => (),
-                                        Err(_) => return Err(()),
+                                        Err(e) => return Err(AsepriteError::Other(Box::new(e))),
                                     }
 
                                     c.raw_data = Some(r.into());

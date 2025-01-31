@@ -20,10 +20,10 @@ const LAYER_RESIZE_ICON_SPREAD: f32   = 8.0;
 /// The colour of the resizing indicator and arrows for the layer list.
 const LAYER_RESIZE_COLOUR:      Color = Color::ORANGERED;
 
-struct Part {
-    pos: Vector2,
-    spd: f32
-}
+// struct Part {
+//     pos: Vector2,
+//     spd: f32
+// }
 
 #[derive(Default)]
 pub struct UIState {
@@ -41,7 +41,7 @@ pub struct UIState {
     pub window_w: i32,
     pub window_h: i32,
 
-    particles: Vec<Part>,
+    // particles: Vec<Part>,
 
     pub layer_list_visible: bool,
     layer_list_width: f32,
@@ -75,18 +75,18 @@ pub fn ui() {
 
     let mut rng = rand::thread_rng();
 
-    state.particles.reserve(10_000);
-    for _ in 0..state.particles.capacity() {
-        state.particles.push(
-            Part{
-                pos: Vector2{
-                    x: rng.gen_range(-WINDOW_W as f32/MAX_ZOOM_IN..WINDOW_W as f32/MAX_ZOOM_IN),
-                    y: rng.gen_range(-WINDOW_H as f32/MAX_ZOOM_IN..WINDOW_H as f32/MAX_ZOOM_IN)
-                },
-                spd: rng.gen_range(0.1..3.0)
-            }
-        );
-    }
+    // state.particles.reserve(10_000);
+    // for _ in 0..state.particles.capacity() {
+    //     state.particles.push(
+    //         Part{
+    //             pos: Vector2{
+    //                 x: rng.gen_range(-WINDOW_W as f32/MAX_ZOOM_IN..WINDOW_W as f32/MAX_ZOOM_IN),
+    //                 y: rng.gen_range(-WINDOW_H as f32/MAX_ZOOM_IN..WINDOW_H as f32/MAX_ZOOM_IN)
+    //             },
+    //             spd: rng.gen_range(0.1..3.0)
+    //         }
+    //     );
+    // }
 
     rl.set_target_fps(60);
 
@@ -192,12 +192,12 @@ pub fn ui() {
                     x: left, y: top, width, height
                 }, MAX_ZOOM_OUT, Color::RED);
 
-                for part in &state.particles {
-                    let px = wrap(part.pos.x - (cam.target.x * part.spd), left, left + width);
-                    let py = wrap(part.pos.y - (cam.target.y * part.spd), top, top + height);
+                // for part in &state.particles {
+                //     let px = wrap(part.pos.x - (cam.target.x * part.spd), left, left + width);
+                //     let py = wrap(part.pos.y - (cam.target.y * part.spd), top, top + height);
 
-                    d.draw_circle(px as i32, py as i32, part.spd / cam.zoom, Color{ a: 40, ..Color::WHITE });
-                }
+                //     d.draw_circle(px as i32, py as i32, part.spd / cam.zoom, Color{ a: 40, ..Color::WHITE });
+                // }
                 
                 if let Some(ref mut spr) = state.loaded_sprite {
                     spr.draw(&mut d, &cam);
