@@ -31,6 +31,8 @@ const NO_PARENT:       usize = usize::MAX;
 /// How far the recursive functions can go until they stop.
 const RECURSIVE_LIMIT: u8    = 16;
 
+const DEBUG_VISUALS: bool = false;
+
 pub struct PreparedCel {
     // image:       Option<Image>,
     texture:     Option<Texture2D>,
@@ -42,7 +44,8 @@ pub struct PreparedCel {
 
     linked_to_frame: Option<u16>,
 
-    bounds: Rectangle,
+    content_bounds: Rectangle,
+    collision_bounds: Rectangle,
 
     hover: bool
 }
@@ -123,6 +126,11 @@ impl LoadedSprite {
         let mut loaded_layers = vec![];
         let mut loaded_tags = vec![];
 
+        let off = Vector2{
+            x: (main_data.header.width * main_data.header.pixel_width as u16 + GAP) as f32,
+            y: (main_data.header.height * main_data.header.pixel_height as u16 + GAP) as f32
+        };
+
         for (frame_idx, frame) in main_data.frames.iter_mut().enumerate() {
             for (chunk_idx, chunk) in frame.chunks.iter_mut().enumerate() {
                 match chunk {
@@ -168,11 +176,17 @@ impl LoadedSprite {
                                         position:        Vector2 { x: cel.x_pos as f32, y: cel.y_pos as f32 },
                                         size:            Vector2 { x: cel.width.unwrap_or(0) as f32, y: cel.height.unwrap_or(0) as f32 },
                                         opacity:         cel.opacity,
-                                        bounds:          Rectangle {
+                                        content_bounds:          Rectangle {
                                             x: frame_idx as f32 + cel.x_pos as f32,
                                             y: (cel.layer_index as f32 - cel.y_pos as f32) * -1.0,
                                             width: cel.width.unwrap_or(0) as f32,
                                             height: cel.height.unwrap_or(0) as f32
+                                        },
+                                        collision_bounds:       Rectangle{
+                                            x: frame_idx as f32 * off.x,
+                                            y: cel.layer_index as f32 * off.y * -1.0,
+                                            width: main_data.header.width as f32 * main_data.header.pixel_width.max(1) as f32,
+                                            height: main_data.header.height as f32 * main_data.header.pixel_height.max(1) as f32,
                                         },
                                         hover: false
                                     });
@@ -188,11 +202,17 @@ impl LoadedSprite {
                                     position:        Vector2 { x: 0.0, y: 0.0 },
                                     size:            Vector2 { x: main_data.header.width as f32, y: main_data.header.height as f32 },
                                     opacity:         255,
-                                    bounds:          Rectangle {
+                                    content_bounds:          Rectangle {
                                         x: frame_idx as f32,
                                         y: cel.layer_index as f32 * -1.0,
                                         width: main_data.header.width as f32,
                                         height: main_data.header.height as f32
+                                    },
+                                    collision_bounds:       Rectangle{
+                                        x: frame_idx as f32 * off.x,
+                                        y: cel.layer_index as f32 * off.y * -1.0,
+                                        width: main_data.header.width as f32 * main_data.header.pixel_width.max(1) as f32,
+                                        height: main_data.header.height as f32 * main_data.header.pixel_height.max(1) as f32,
                                     },
                                     hover: false
                                 });
@@ -271,8 +291,8 @@ impl LoadedSprite {
             };
 
             d.draw_rectangle_lines(
-                (img.bounds.x + img.frame_index as f32 * off.x) as i32 - img.position.x as i32,
-                (img.bounds.y - img.layer_index as f32 * off.y) as i32 - img.position.y as i32,
+                (img.content_bounds.x + img.frame_index as f32 * (off.x - 1.0)) as i32 - img.position.x as i32,
+                (img.content_bounds.y - img.layer_index as f32 * (off.y - 1.0)) as i32 - img.position.y as i32,
                 image_width as i32 * scale_x,
                 image_height as i32 * scale_y,
                 rect_colour
@@ -282,27 +302,27 @@ impl LoadedSprite {
                 if img.hover {
                     d.draw_line_ex(
                         Vector2{
-                            x: (img.frame_index as f32 * (off.x + 1.0) + (image_width as f32 / 2.0)), 
-                            y: (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0)) * -1.0
+                            x: (img.frame_index as f32 * (off.x) + (image_width as f32 / 2.0)), 
+                            y: (img.layer_index as f32 * (off.y) - (image_height as f32 / 2.0)) * -1.0
                         },
                         Vector2{
-                            x: (link as f32 * (off.x + 1.0) + (image_width as f32 / 2.0)),
-                            y: (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0)) * -1.0
+                            x: (link as f32 * (off.x) + (image_width as f32 / 2.0)),
+                            y: (img.layer_index as f32 * (off.y) - (image_height as f32 / 2.0)) * -1.0
                         },
                         3.0,
                         rect_colour
                     );
 
                     d.draw_circle(
-                        (link as f32 * (off.x + 1.0) + (image_width as f32 / 2.0)) as i32, 
-                        (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0)) as i32 * -1, 
+                        (link as f32 * (off.x) + (image_width as f32 / 2.0)) as i32, 
+                        (img.layer_index as f32 * (off.y) - (image_height as f32 / 2.0)) as i32 * -1, 
                         6.0 + f32::sin(d.get_time() as f32 * 1.7) * 2.4,
                         rect_colour
                     );
 
                     for i in 0..(img.frame_index as u16 - link) {
-                        let cx = ((link + i + 1) as f32 - d.get_time().fract() as f32) * (off.x + 1.0) + (image_width as f32 / 2.0);
-                        let cy = (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0)) * -1.0;
+                        let cx = ((link + i + 1) as f32 - d.get_time().fract() as f32) * (off.x) + (image_width as f32 / 2.0);
+                        let cy = (img.layer_index as f32 * (off.y) - (image_height as f32 / 2.0)) * -1.0;
                         let r = 3.5;
 
                         let v1 = Vector2{
@@ -333,8 +353,8 @@ impl LoadedSprite {
                     }
                 }
 
-                let tx = (img.frame_index as f32 * (off.x + 1.0) + (image_width as f32 / 2.0)) as i32;
-                let ty = (img.layer_index as f32 * (off.y + 1.0) - (image_height as f32 / 2.0) + 16.) as i32 * -1;
+                let tx = (img.frame_index as f32 * (off.x) + (image_width as f32 / 2.0)) as i32;
+                let ty = (img.layer_index as f32 * (off.y) - (image_height as f32 / 2.0) + 16.) as i32 * -1;
                 
                 d.draw_text(
                     format!("{}", link).as_str(), 
@@ -352,8 +372,8 @@ impl LoadedSprite {
                         height: img.size.y,
                     }, 
                     Rectangle{
-                        x: (img.bounds.x + (img.frame_index as f32 * off.x)) * scale_x as f32,
-                        y: (img.bounds.y - (img.layer_index as f32 * off.y)) * scale_y as f32,
+                        x: (img.content_bounds.x + (img.frame_index as f32 * (off.x - 1.0))) * scale_x as f32,
+                        y: (img.content_bounds.y - (img.layer_index as f32 * (off.y - 1.0))) * scale_y as f32,
                         width: img.size.x * scale_x as f32,
                         height: img.size.y * scale_y as f32,
                     }, 
@@ -366,6 +386,8 @@ impl LoadedSprite {
                     }, ..Color::WHITE}
                 );
             }
+
+            if DEBUG_VISUALS { d.draw_rectangle_lines_ex(img.collision_bounds, 2.0, ERR_COLOR); }
         }
 
         let line_alpha = (24. * cam.zoom).clamp(0., 255.) as u8;
@@ -381,7 +403,7 @@ impl LoadedSprite {
                 FONT_SIZE_REG, LABEL_COLOR
             );
             
-            let line_y = ((off.y + 1.0) as i32 * i as i32) * -1;
+            let line_y = ((off.y) as i32 * i as i32) * -1;
             let line_y2 = line_y + image_height as i32 * scale_y;
             
             d.draw_line(
@@ -417,20 +439,20 @@ impl LoadedSprite {
             let width = width / 2;
 
             d.draw_text(fstr,
-                ((off.x + 1.0) * i as f32) as i32 + width,
+                ((off.x) * i as f32) as i32 + width,
                 (off.y + 16.0) as i32,
                 FONT_SIZE_REG,
                 LABEL_COLOR
             );
 
             d.draw_text(fstr,
-                ((off.x + 1.0) * i as f32) as i32 + width,
+                ((off.x) * i as f32) as i32 + width,
                 (off.y * (self.loaded_layers.len() - 1) as f32 + 16.0) as i32 * -1,
                 FONT_SIZE_REG,
                 LABEL_COLOR
             );
             
-            let line_x = ((off.x + 1.0) * (i as f32) as f32) as i32;
+            let line_x = ((off.x) * (i as f32) as f32) as i32;
             let line_x2 = line_x + image_width as i32 * scale_x;
 
             d.draw_line(
@@ -457,6 +479,28 @@ impl LoadedSprite {
                 Color{a: line_alpha/4, ..BIG_LINE_COLOR}
             );
         }
+
+        if DEBUG_VISUALS {
+            let mouse_pt = d.get_screen_to_world2D(d.get_mouse_position(), cam);
+            d.draw_line(
+                mouse_pt.x as i32, mouse_pt.y as i32 - 16,
+                mouse_pt.x as i32, mouse_pt.y as i32 + 16,
+                ERR_COLOR
+            );
+            d.draw_line(
+                mouse_pt.x as i32 - 16, mouse_pt.y as i32,
+                mouse_pt.x as i32 + 16, mouse_pt.y as i32,
+                ERR_COLOR
+            );
+
+            if let Some(img) = self.loaded_cels.iter().find(|x| x.hover) {
+                d.draw_text(
+                    format!("l{}f{}\nctnt{:?}\ncoll{:?}", img.layer_index, img.frame_index, img.content_bounds, img.collision_bounds).as_str(),
+                    img.collision_bounds.x as i32, img.collision_bounds.y as i32,
+                    FONT_SIZE_REG, Color::LIME
+                );
+            }
+        }
     }
 
     pub fn step(&mut self, rl: &mut RaylibHandle, cam: &Camera2D) {
@@ -472,14 +516,7 @@ impl LoadedSprite {
         };
 
         for img in &mut self.loaded_cels {
-            let range = Rectangle{
-                x: (img.frame_index as f32 * off.x) * scale_x as f32,
-                y: (img.layer_index as f32 * off.y) * scale_y as f32 * -1.0,
-                width: header.width as f32 * scale_x as f32,
-                height: header.height as f32 * scale_y as f32,
-            };
-
-            img.hover = range.check_collision_point_rec(mouse_pt);
+            img.hover = img.collision_bounds.check_collision_point_rec(mouse_pt);
         }
     }
 
