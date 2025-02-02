@@ -503,7 +503,6 @@ impl LoadedSprite {
     }
 
     pub fn step(&mut self, rl: &mut RaylibHandle, cam: &Camera2D) {
-        let header = &self.main_data.header;
         let mouse_pt = rl.get_screen_to_world2D(rl.get_mouse_position(), cam);
 
         for img in &mut self.loaded_cels {
