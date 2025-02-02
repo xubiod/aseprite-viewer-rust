@@ -1,6 +1,5 @@
 use std::ffi::CString;
 
-use rand::Rng;
 use raylib::prelude::*;
 use raylib::{color::Color, math::Vector2};
 
@@ -73,7 +72,7 @@ pub fn ui() {
         ..Default::default()
     };
 
-    let mut rng = rand::thread_rng();
+    // let mut rng = rand::thread_rng();
 
     // state.particles.reserve(10_000);
     // for _ in 0..state.particles.capacity() {
@@ -227,26 +226,26 @@ pub fn ui() {
     }
 }
 
-fn wrap(x: f32, lo: f32, hi: f32) -> f32 {
-    let mut x = x;
-    let mut lo1 = lo;
-    let mut hi1 = hi;
-    let mut subby = 0.;
+// fn wrap(x: f32, lo: f32, hi: f32) -> f32 {
+//     let mut x = x;
+//     let mut lo1 = lo;
+//     let mut hi1 = hi;
+//     let mut subby = 0.;
 
-    if lo1 < 0. {
-        lo1 += lo.abs();
-        hi1 += lo.abs();
-        subby = lo.abs();
-    }
+//     if lo1 < 0. {
+//         lo1 += lo.abs();
+//         hi1 += lo.abs();
+//         subby = lo.abs();
+//     }
 
-    let size = hi1 - lo1 + 1.;
+//     let size = hi1 - lo1 + 1.;
 
-    if x < lo1 {
-        x += size * ((lo1 - x) / size + 1.);
-    }
+//     if x < lo1 {
+//         x += size * ((lo1 - x) / size + 1.);
+//     }
 
-    (lo1 + (x - lo1) % size) - subby
-}
+//     (lo1 + (x - lo1) % size) - subby
+// }
 
 fn label_wrapper(d: &mut RaylibDrawHandle, bounds: impl Into<ffi::Rectangle>, text: &str, is_btn: bool) -> bool {
     let lbl_str = CString::new(text).unwrap();
