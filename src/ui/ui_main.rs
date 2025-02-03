@@ -1,7 +1,10 @@
 use std::ffi::CString;
+use std::io::{stderr, Write};
 
 use raylib::prelude::*;
 use raylib::{color::Color, math::Vector2};
+
+use crate::ase::aseprite::AsepriteError;
 
 use super::loaded_aseprite::{LoadedSprite, GAP};
 use super::toast::Toast;
@@ -104,42 +107,65 @@ pub fn ui() {
                 for fname in list.paths() {
                     for ext in ACCEPTED_TYPES {
                         if rl.is_file_extension(fname, ext) {
-                            let new = LoadedSprite::load(
-                                fname,
-                                &mut rl,
-                                &thread
-                            );
 
-                            state.layer_list_visible = state.loaded_sprite.is_none() || state.layer_list_visible;
-                            state.loaded_sprite = new.ok();
+                            match LoadedSprite::load(fname, &mut rl, &thread) {
+                                Ok(new) => {
+                                    state.layer_list_visible = state.loaded_sprite.is_none() || state.layer_list_visible;
+                                    state.loaded_sprite = Some(new);
+        
+                                    let img_ref = state.loaded_sprite.as_ref().unwrap();
+        
+                                    state.default_position = Vector2{
+                                        x: (img_ref.frame_count + GAP as usize) as f32 * img_ref.main_data.header.pixel_width as f32 * img_ref.main_data.header.width as f32,
+                                        y: (img_ref.loaded_layers.len() + GAP as usize) as f32 * img_ref.main_data.header.pixel_height as f32 * img_ref.main_data.header.height as f32,
+                                    };
+        
+                                    state.default_position *= 0.5;
+                                    state.default_position.y *= -1.0;
+        
+                                    state.desired_position = state.default_position;
+        
+                                    state.toasts.push(
+                                        Toast::new(
+                                        {
+                                                format!(
+                                                    "file loaded successfully; {} cels, {} frames, {} layers",
+                                                    img_ref.loaded_cels.len(),
+                                                    img_ref.loaded_layers.len(),
+                                                    img_ref.frame_count,
+                                                ).as_str()
+                                            },
+                                            180
+                                        )
+                                    );
+        
+                                    break
+                                },
+                                Err(e) => {
+                                    match e {
+                                        AsepriteError::RanOutAtHeader => {
+                                            state.toasts.push(Toast::new(
+                                                "file error! too small to have header",
+                                                210
+                                            ));
+                                        },
+                                        AsepriteError::HeaderMagicMismatch | AsepriteError::FrameMagicMismatch => {
+                                            state.toasts.push(Toast::new(
+                                                "file error! corrupted data!",
+                                                210
+                                            ));
+                                        },
+                                        AsepriteError::Other(error) => {
+                                            state.toasts.push(Toast::new(
+                                                "unknown error, check error output for details",
+                                                240
+                                            ));
 
-                            let img_ref = state.loaded_sprite.as_ref().unwrap();
-
-                            state.default_position = Vector2{
-                                x: (img_ref.frame_count + GAP as usize) as f32 * img_ref.main_data.header.pixel_width as f32 * img_ref.main_data.header.width as f32,
-                                y: (img_ref.loaded_layers.len() + GAP as usize) as f32 * img_ref.main_data.header.pixel_height as f32 * img_ref.main_data.header.height as f32,
+                                            let _ = stderr().write_all(error.to_string().as_bytes());
+                                        },
+                                    }
+                                },
                             };
-
-                            state.default_position *= 0.5;
-                            state.default_position.y *= -1.0;
-
-                            state.desired_position = state.default_position;
-
-                            state.toasts.push(
-                                Toast::new(
-                                {
-                                        format!(
-                                            "file loaded successfully; {} cels, {} frames, {} layers",
-                                            img_ref.loaded_cels.len(),
-                                            img_ref.loaded_layers.len(),
-                                            img_ref.frame_count,
-                                        ).as_str()
-                                    },
-                                    180
-                                )
-                            );
-
-                            break
                         }
                     }
                 }

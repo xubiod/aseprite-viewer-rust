@@ -5,7 +5,7 @@ use std::{f32::consts::FRAC_PI_3, ffi::CString, fs::File};
 use raylib::prelude::*;
 use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, texture::{RaylibTexture2D, Texture2D}, RaylibHandle, RaylibThread};
 
-use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteLayerFlags, AsepriteLayerType, AsepriteTagDirection};
+use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteError, AsepriteLayerFlags, AsepriteLayerType, AsepriteTagDirection};
 
 use super::ui_main::{FONT_SIZE_BIG, FONT_SIZE_REG};
 
@@ -119,10 +119,13 @@ impl LoadedSprite {
         result
     }
 
-    pub fn load(fname: &str, rl: &mut RaylibHandle, thread: &RaylibThread) -> Result<Self, ()> {
+    pub fn load(fname: &str, rl: &mut RaylibHandle, thread: &RaylibThread) -> Result<Self, AsepriteError> {
         let mut f_in = File::open(fname).unwrap();
     
-        let mut main_data = aseprite::read(&mut f_in).unwrap();
+        let mut main_data: Aseprite = match aseprite::read(&mut f_in) {
+            Ok(d) => d,
+            Err(err) => return Err(err),
+        };
 
         let mut loaded_cels = vec![];
         let mut loaded_layers = vec![];
