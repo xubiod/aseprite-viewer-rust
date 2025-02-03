@@ -112,11 +112,9 @@ pub fn ui() {
                                 Ok(new) => {
                                     state.layer_list_visible = state.loaded_sprite.is_none() || state.layer_list_visible;
                                     
-                                    let img_ref = &new;
-                                    
                                     state.default_position = Vector2{
-                                        x: (img_ref.frame_count + GAP as usize) as f32 * img_ref.main_data.header.pixel_width as f32 * img_ref.main_data.header.width as f32,
-                                        y: (img_ref.loaded_layers.len() + GAP as usize) as f32 * img_ref.main_data.header.pixel_height as f32 * img_ref.main_data.header.height as f32,
+                                        x: (new.frame_count + GAP as usize) as f32 * new.main_data.header.pixel_width as f32 * new.main_data.header.width as f32,
+                                        y: (new.loaded_layers.len() + GAP as usize) as f32 * new.main_data.header.pixel_height as f32 * new.main_data.header.height as f32,
                                     };
                                     
                                     state.default_position *= 0.5;
@@ -129,9 +127,9 @@ pub fn ui() {
                                             {
                                                 format!(
                                                     "file loaded successfully; {} cels, {} frames, {} layers",
-                                                    img_ref.loaded_cels.len(),
-                                                    img_ref.loaded_layers.len(),
-                                                    img_ref.frame_count,
+                                                    new.loaded_cels.len(),
+                                                    new.loaded_layers.len(),
+                                                    new.frame_count,
                                                 ).as_str()
                                             },
                                             180
