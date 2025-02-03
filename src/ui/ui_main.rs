@@ -111,23 +111,22 @@ pub fn ui() {
                             match LoadedSprite::load(fname, &mut rl, &thread) {
                                 Ok(new) => {
                                     state.layer_list_visible = state.loaded_sprite.is_none() || state.layer_list_visible;
-                                    state.loaded_sprite = Some(new);
-        
-                                    let img_ref = state.loaded_sprite.as_ref().unwrap();
-        
+                                    
+                                    let img_ref = &new;
+                                    
                                     state.default_position = Vector2{
                                         x: (img_ref.frame_count + GAP as usize) as f32 * img_ref.main_data.header.pixel_width as f32 * img_ref.main_data.header.width as f32,
                                         y: (img_ref.loaded_layers.len() + GAP as usize) as f32 * img_ref.main_data.header.pixel_height as f32 * img_ref.main_data.header.height as f32,
                                     };
-        
+                                    
                                     state.default_position *= 0.5;
                                     state.default_position.y *= -1.0;
-        
+                                    
                                     state.desired_position = state.default_position;
-        
+                                    
                                     state.toasts.push(
                                         Toast::new(
-                                        {
+                                            {
                                                 format!(
                                                     "file loaded successfully; {} cels, {} frames, {} layers",
                                                     img_ref.loaded_cels.len(),
@@ -138,6 +137,8 @@ pub fn ui() {
                                             180
                                         )
                                     );
+
+                                    state.loaded_sprite = Some(new);
         
                                     break
                                 },
