@@ -153,7 +153,7 @@ impl LoadedSprite {
                             visible:      lchunk.flags & AsepriteLayerFlags::Visible > 0,
                             background:   lchunk.flags & AsepriteLayerFlags::Background > 0,
                             is_reference: lchunk.flags & AsepriteLayerFlags::IsReference > 0,
-                            name:         lchunk.name.as_str().ok().unwrap_or(format!("??? {chunk_idx}").as_str()).to_owned(),
+                            name:         lchunk.name.as_str().ok().unwrap_or(format!("frame{frame_idx} chunk{chunk_idx}").as_str()).to_owned(),
                             full_name:    None,
 
                             parent_index: NO_PARENT,
