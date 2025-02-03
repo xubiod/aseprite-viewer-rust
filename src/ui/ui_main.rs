@@ -371,12 +371,14 @@ fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
                     height: 72.0
                 }, Some(properties_contents.as_c_str()));
 
-                d.gui_check_box(Rectangle{
+                if d.gui_check_box(Rectangle{
                     x: prop_bounds.x + 8.0,
                     y: prop_bounds.y + prop_bounds.height - 28.0,
                     width: 24.0,
                     height: 24.0,
-                }, Some(rstr!("Visible")), &mut loaded.loaded_layers[effective_layer_active].visible);
+                }, Some(rstr!("Visible")), &mut loaded.loaded_layers[effective_layer_active].visible) {
+                    loaded.invalidate_layer_list();
+                }
             }
         }
     }

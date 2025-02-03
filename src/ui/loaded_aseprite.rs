@@ -520,6 +520,10 @@ impl LoadedSprite {
         }
     }
 
+    pub fn invalidate_layer_list(&mut self) {
+        self.cached_list = None
+    }
+
     pub fn generate_layer_list(&mut self) -> &CString {
         if self.cached_list.is_none() {
             self.cached_list = Some(Box::new(CString::new(self.loaded_layers.iter().rev()
