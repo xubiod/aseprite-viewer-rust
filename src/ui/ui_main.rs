@@ -144,21 +144,24 @@ pub fn ui() {
                                 Err(e) => {
                                     match e {
                                         AsepriteError::RanOutAtHeader => {
-                                            state.toasts.push(Toast::new(
+                                            state.toasts.push(Toast::new_ex(
                                                 "file error! too small to have header",
-                                                210
+                                                210,
+                                                Color::MAROON
                                             ));
                                         },
                                         AsepriteError::HeaderMagicMismatch | AsepriteError::FrameMagicMismatch => {
-                                            state.toasts.push(Toast::new(
+                                            state.toasts.push(Toast::new_ex(
                                                 "file error! corrupted data!",
-                                                210
+                                                210,
+                                                Color::MAROON
                                             ));
                                         },
                                         AsepriteError::Other(error) => {
-                                            state.toasts.push(Toast::new(
+                                            state.toasts.push(Toast::new_ex(
                                                 "unknown error, check error output for details",
-                                                240
+                                                240,
+                                                Color::MAROON
                                             ));
 
                                             let _ = stderr().write_all(error.to_string().as_bytes());

@@ -29,6 +29,10 @@ impl Toast {
         }
     }
 
+    pub fn new_ex(text: &str, timer: i32, background: Color) -> Self {
+        Self { background: Color{a: 192, ..background}, ..Self::new(text, timer) }
+    }
+
     pub fn draw(&mut self, y_offset: f32, d: &mut RaylibDrawHandle, window_w: i32) {
         let w = d.measure_text(&self.text, FONT_SIZE_REG) as f32;
         let padding = 6.;
