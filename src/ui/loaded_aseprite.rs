@@ -164,7 +164,7 @@ impl LoadedSprite {
                             aseprite::AsepriteCelType::Raw | aseprite::AsepriteCelType::CompressedImage => {
                                 if let Some(img_data) = &mut cel.raw_data {
                                     let mut img = raylib::texture::Image::gen_image_color(
-                                        cel.width.unwrap().into(), cel.height.unwrap().into(),
+                                        cel.width.unwrap_or(1).into(), cel.height.unwrap_or(1).into(),
                                         ERR_COLOR
                                     );
                                     
