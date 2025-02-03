@@ -288,8 +288,7 @@ fn label_wrapper(d: &mut RaylibDrawHandle, bounds: impl Into<ffi::Rectangle>, te
 fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
     if let Some(ref mut loaded) = state.loaded_sprite {
         if state.layer_list_visible {
-            let dd_str = loaded.generate_layer_list();
-            let dd_str = dd_str.as_c_str();
+            let dd_str = loaded.generate_layer_list().as_c_str();
 
             let layer_list_rec = Rectangle{
                 x: 0.0,
