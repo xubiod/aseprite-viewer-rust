@@ -80,7 +80,9 @@ pub(crate) struct LoadedSprite {
     pub loaded_tags:   Vec<PreparedTag>,
     pub frame_count:   usize,
 
-    offset: Vector2
+    offset: Vector2,
+
+    cached_list: Option<Box<CString>>
 }
 
 impl LoadedSprite {
@@ -258,7 +260,9 @@ impl LoadedSprite {
         let mut r = Self {
             main_data, loaded_cels, loaded_layers, loaded_tags, frame_count,
 
-            offset
+            offset,
+
+            cached_list: None
         };
 
         for layer_index in 0..r.loaded_layers.len() {
@@ -513,8 +517,9 @@ impl LoadedSprite {
         }
     }
 
-    pub fn generate_layer_list(&self) -> CString {
-        CString::new(self.loaded_layers.iter().rev()
+    pub fn generate_layer_list(&mut self) -> &CString {
+        if self.cached_list.is_none() {
+            self.cached_list = Some(Box::new(CString::new(self.loaded_layers.iter().rev()
             .map(|i| {
                 format!("{} {}",
                     match i.layer_type {
@@ -524,6 +529,9 @@ impl LoadedSprite {
                     },
                     i.full_name.as_ref().unwrap()
                 )
-            }).collect::<Vec<String>>().join(";").as_str()).ok().unwrap()
+            }).collect::<Vec<String>>().join(";").as_str()).ok().unwrap()));
+        }
+
+        self.cached_list.as_ref().unwrap()
     }
 }
