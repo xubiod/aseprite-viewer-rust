@@ -122,7 +122,10 @@ impl LoadedSprite {
     }
 
     pub fn load(fname: &str, rl: &mut RaylibHandle, thread: &RaylibThread) -> Result<Self, AsepriteError> {
-        let mut f_in = File::open(fname).unwrap();
+        let mut f_in = match File::open(fname) {
+            Ok(f) => f,
+            Err(e) => return Err(AsepriteError::Other(Box::new(e))),
+        };
     
         let mut main_data: Aseprite = match aseprite::read(&mut f_in) {
             Ok(d) => d,
