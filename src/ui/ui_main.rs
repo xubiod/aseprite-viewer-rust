@@ -196,7 +196,7 @@ pub fn ui() {
                 loaded.step(&mut rl, &cam);
             }
             
-            state.toasts.retain(|i: &Toast       | i.is_alive());
+            state.toasts.retain(|i| i.is_alive());
         }
 
         // draw
