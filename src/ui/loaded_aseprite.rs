@@ -25,8 +25,8 @@ const LINKED_COLOR:     Color = Color::ORANGERED;
 /// A generic error colour for trying to determine if something was drawn proper.
 const ERR_COLOR:        Color = Color::FUCHSIA;
 
-/// A general number to signify no parent. Should be the maximum for the type if
-/// unsigned, or a negative number for a signed type.
+/// A general number to signify no parent. Should be a reasonably infeasible
+/// number.
 const NO_PARENT:       usize = usize::MAX;
 /// How far the recursive functions can go until they stop.
 const RECURSIVE_LIMIT: u8    = 16;
