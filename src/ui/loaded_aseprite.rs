@@ -73,14 +73,18 @@ pub struct PreparedTag {
 }
 
 pub(crate) struct LoadedSprite {
-    pub main_data: Aseprite,
-
     pub loaded_cels:   Vec<PreparedCel>,
     pub loaded_layers: Vec<PreparedLayer>,
     pub loaded_tags:   Vec<PreparedTag>,
     pub frame_count:   usize,
 
     offset: Vector2,
+
+    pub image_width:  u16,
+    pub image_height: u16,
+
+    pub pixel_width:  u8,
+    pub pixel_height: u8,
 
     cached_list: Option<Box<CString>>
 }
@@ -136,9 +140,12 @@ impl LoadedSprite {
         let mut loaded_layers = vec![];
         let mut loaded_tags = vec![];
 
+        let (image_width, image_height) = (main_data.header.width, main_data.header.height);
+        let (pixel_width, pixel_height) = (main_data.header.pixel_width.max(1), main_data.header.pixel_height.max(1));
+        
         let offset = Vector2{
-            x: (main_data.header.width * main_data.header.pixel_width as u16 + GAP) as f32,
-            y: (main_data.header.height * main_data.header.pixel_height as u16 + GAP) as f32
+            x: (image_width * pixel_width as u16 + GAP) as f32,
+            y: (image_height * pixel_height as u16 + GAP) as f32
         };
 
         for (frame_idx, frame) in main_data.frames.iter_mut().enumerate() {
@@ -195,8 +202,8 @@ impl LoadedSprite {
                                         collision_bounds:       Rectangle{
                                             x: frame_idx as f32 * offset.x,
                                             y: cel.layer_index as f32 * offset.y * -1.0,
-                                            width: main_data.header.width as f32 * main_data.header.pixel_width.max(1) as f32,
-                                            height: main_data.header.height as f32 * main_data.header.pixel_height.max(1) as f32,
+                                            width: main_data.header.width as f32 * pixel_width as f32,
+                                            height: main_data.header.height as f32 * pixel_height as f32,
                                         },
                                         hover: false
                                     });
@@ -210,19 +217,19 @@ impl LoadedSprite {
                                     texture:         None,
                                     linked_to_frame: cel.linked_to,
                                     position:        Vector2 { x: 0.0, y: 0.0 },
-                                    size:            Vector2 { x: main_data.header.width as f32, y: main_data.header.height as f32 },
+                                    size:            Vector2 { x: image_width as f32, y: image_height as f32 },
                                     opacity:         255,
                                     content_bounds:          Rectangle {
                                         x: frame_idx as f32,
                                         y: cel.layer_index as f32 * -1.0,
-                                        width: main_data.header.width as f32,
-                                        height: main_data.header.height as f32
+                                        width: image_width as f32,
+                                        height: image_height as f32
                                     },
                                     collision_bounds:       Rectangle{
                                         x: frame_idx as f32 * offset.x,
                                         y: cel.layer_index as f32 * offset.y * -1.0,
-                                        width: main_data.header.width as f32 * main_data.header.pixel_width.max(1) as f32,
-                                        height: main_data.header.height as f32 * main_data.header.pixel_height.max(1) as f32,
+                                        width: image_width as f32 * pixel_width as f32,
+                                        height: image_height as f32 * pixel_height as f32,
                                     },
                                     hover: false
                                 });
@@ -261,9 +268,11 @@ impl LoadedSprite {
 
         let frame_count = main_data.frames.len();
         let mut r = Self {
-            main_data, loaded_cels, loaded_layers, loaded_tags, frame_count,
+            loaded_cels, loaded_layers, loaded_tags, frame_count,
 
             offset,
+
+            image_width, image_height, pixel_width, pixel_height,
 
             cached_list: None
         };
@@ -276,13 +285,8 @@ impl LoadedSprite {
     }
 
     pub fn draw(&mut self, d: &mut RaylibMode2D<'_, RaylibDrawHandle<'_>>, cam: &Camera2D) {
-        let header = &self.main_data.header;
-
-        let scale_x: i32 = header.pixel_width.max(1).into();
-        let scale_y: i32 = header.pixel_height.max(1).into();
-
-        let image_width = header.width;
-        let image_height = header.height;
+        let scale_x: i32 = self.pixel_width.into();
+        let scale_y: i32 = self.pixel_height.into();
 
         for img in self.loaded_cels.iter() {
             let my_layer = &self.loaded_layers[img.layer_index as usize];
@@ -302,8 +306,8 @@ impl LoadedSprite {
             d.draw_rectangle_lines(
                 (img.content_bounds.x + img.frame_index as f32 * (self.offset.x - 1.0)) as i32 - img.position.x as i32,
                 (img.content_bounds.y - img.layer_index as f32 * (self.offset.y - 1.0)) as i32 - img.position.y as i32,
-                image_width as i32 * scale_x,
-                image_height as i32 * scale_y,
+                self.image_width as i32 * scale_x,
+                self.image_height as i32 * scale_y,
                 rect_colour
             );
 
@@ -311,27 +315,27 @@ impl LoadedSprite {
                 if img.hover {
                     d.draw_line_ex(
                         Vector2{
-                            x: (img.frame_index as f32 * (self.offset.x) + (image_width as f32 / 2.0)), 
-                            y: (img.layer_index as f32 * (self.offset.y) - (image_height as f32 / 2.0)) * -1.0
+                            x: (img.frame_index as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)), 
+                            y: (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) * -1.0
                         },
                         Vector2{
-                            x: (link as f32 * (self.offset.x) + (image_width as f32 / 2.0)),
-                            y: (img.layer_index as f32 * (self.offset.y) - (image_height as f32 / 2.0)) * -1.0
+                            x: (link as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)),
+                            y: (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) * -1.0
                         },
                         3.0,
                         rect_colour
                     );
 
                     d.draw_circle(
-                        (link as f32 * (self.offset.x) + (image_width as f32 / 2.0)) as i32, 
-                        (img.layer_index as f32 * (self.offset.y) - (image_height as f32 / 2.0)) as i32 * -1, 
+                        (link as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)) as i32, 
+                        (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) as i32 * -1, 
                         6.0 + f32::sin(d.get_time() as f32 * 1.7) * 2.4,
                         rect_colour
                     );
 
                     for i in 0..(img.frame_index as u16 - link) {
-                        let cx = ((link + i + 1) as f32 - d.get_time().fract() as f32) * (self.offset.x) + (image_width as f32 / 2.0);
-                        let cy = (img.layer_index as f32 * (self.offset.y) - (image_height as f32 / 2.0)) * -1.0;
+                        let cx = ((link + i + 1) as f32 - d.get_time().fract() as f32) * (self.offset.x) + (self.image_width as f32 / 2.0);
+                        let cy = (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) * -1.0;
                         let r = 3.5;
 
                         let v1 = Vector2{
@@ -362,8 +366,8 @@ impl LoadedSprite {
                     }
                 }
 
-                let tx = (img.frame_index as f32 * (self.offset.x) + (image_width as f32 / 2.0)) as i32;
-                let ty = (img.layer_index as f32 * (self.offset.y) - (image_height as f32 / 2.0) + 16.) as i32 * -1;
+                let tx = (img.frame_index as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)) as i32;
+                let ty = (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0) + 16.) as i32 * -1;
                 
                 d.draw_text(
                     format!("{}", link).as_str(), 
@@ -413,7 +417,7 @@ impl LoadedSprite {
             );
             
             let line_y = ((self.offset.y) as i32 * i as i32) * -1;
-            let line_y2 = line_y + image_height as i32 * scale_y;
+            let line_y2 = line_y + self.image_height as i32 * scale_y;
             
             d.draw_line(
                 (16 + m) * -1, line_y,
@@ -444,7 +448,7 @@ impl LoadedSprite {
             let fstr = format!("{}", i);
             let fstr = fstr.as_str();
 
-            let width = image_width as i32 - d.measure_text(fstr, FONT_SIZE_REG);
+            let width = self.image_width as i32 - d.measure_text(fstr, FONT_SIZE_REG);
             let width = width / 2;
 
             d.draw_text(fstr,
@@ -462,7 +466,7 @@ impl LoadedSprite {
             );
             
             let line_x = ((self.offset.x) * (i as f32) as f32) as i32;
-            let line_x2 = line_x + image_width as i32 * scale_x;
+            let line_x2 = line_x + self.image_width as i32 * scale_x;
 
             d.draw_line(
                 line_x, (self.offset.y + 4.0) as i32, 

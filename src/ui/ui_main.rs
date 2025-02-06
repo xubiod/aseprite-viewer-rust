@@ -113,8 +113,8 @@ pub fn ui() {
                                     state.layer_list_visible = state.loaded_sprite.is_none() || state.layer_list_visible;
                                     
                                     state.default_position = Vector2{
-                                        x: (new.frame_count + GAP as usize) as f32 * new.main_data.header.pixel_width as f32 * new.main_data.header.width as f32,
-                                        y: (new.loaded_layers.len() + GAP as usize) as f32 * new.main_data.header.pixel_height as f32 * new.main_data.header.height as f32,
+                                        x: (new.frame_count + GAP as usize) as f32 * new.pixel_width as f32 * new.image_width as f32,
+                                        y: (new.loaded_layers.len() + GAP as usize) as f32 * new.pixel_height as f32 * new.image_height as f32,
                                     };
                                     
                                     state.default_position *= 0.5;
