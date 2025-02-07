@@ -22,6 +22,8 @@ const LAYER_RESIZE_ICON_SPREAD: f32   = 8.0;
 /// The colour of the resizing indicator and arrows for the layer list.
 const LAYER_RESIZE_COLOUR:      Color = Color::ORANGERED;
 
+const TOAST_COLOR_ERROR: Color = Color::MAROON;
+
 // struct Part {
 //     pos: Vector2,
 //     spd: f32
@@ -146,21 +148,21 @@ pub fn ui() {
                                             state.toasts.push(Toast::new_ex(
                                                 "file error! too small to have header",
                                                 210,
-                                                Color::MAROON
+                                                TOAST_COLOR_ERROR
                                             ));
                                         },
                                         AsepriteError::HeaderMagicMismatch | AsepriteError::FrameMagicMismatch => {
                                             state.toasts.push(Toast::new_ex(
                                                 "file error! corrupted data!",
                                                 210,
-                                                Color::MAROON
+                                                TOAST_COLOR_ERROR
                                             ));
                                         },
                                         AsepriteError::Other(error) => {
                                             state.toasts.push(Toast::new_ex(
                                                 "unknown error, check error output for details",
                                                 240,
-                                                Color::MAROON
+                                                TOAST_COLOR_ERROR
                                             ));
 
                                             let _ = stderr().write_all(error.to_string().as_bytes());
