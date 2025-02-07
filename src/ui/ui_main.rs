@@ -388,14 +388,17 @@ fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
 fn bottom_bar(d: &mut RaylibDrawHandle, state: &mut UIState, cam: &Camera2D) {
     d.gui_panel(Rectangle{x: 0., y: (state.window_h - 24) as f32, width: state.window_w as f32, height: 24.}, None);
 
-    match state.loaded_sprite {
-        Some(_) => {
-            if label_wrapper(d, Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.}, if state.layer_list_visible { "#197#" } else { "#196#" }, true) {
-                state.layer_list_visible ^= true;
-            }
-        },
-        None => { label_wrapper(d, Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.},  "#196#", false); },
-    };
+    {
+        let bounds = Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.};
+        match state.loaded_sprite {
+            Some(_) => {
+                if label_wrapper(d, bounds, if state.layer_list_visible { "#197#" } else { "#196#" }, true) {
+                    state.layer_list_visible ^= true;
+                }
+            },
+            None => { label_wrapper(d, bounds,  "#196#", false); },
+        };
+    }
 
     if label_wrapper(d, Rectangle{x: 28., y: (state.window_h - 24) as f32, width: 90., height: 24.},
                      format!("#43# {0:.2}%", cam.zoom * 100.).as_str(), true) {
