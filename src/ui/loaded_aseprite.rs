@@ -533,11 +533,13 @@ impl LoadedSprite {
             self.cached_list = Some(Box::new(CString::new(self.loaded_layers.iter().rev()
             .map(|i| {
                 format!("{} {}",
-                    match i.layer_type {
-                        AsepriteLayerType::Normal  => if i.visible { if i.is_reference { "#15#" } else { "#44#" } } else { "#45#" },
-                        AsepriteLayerType::Group   => if i.visible { "#217#" } else { "#45#" },
-                        AsepriteLayerType::Tilemap => if i.visible { "#97#" } else { "#45#" },
-                    },
+                    if i.visible {
+                        match i.layer_type {
+                            AsepriteLayerType::Normal  => if i.is_reference { "#15#" } else { "#44#" },
+                            AsepriteLayerType::Group   => "#217#",
+                            AsepriteLayerType::Tilemap => "#97#",
+                        }
+                    } else { "#45#" },
                     i.full_name.as_ref().unwrap()
                 )
             }).collect::<Vec<String>>().join(";").as_str()).ok().unwrap()));
