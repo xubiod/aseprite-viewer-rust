@@ -202,8 +202,8 @@ impl LoadedSprite {
                                         collision_bounds:       Rectangle{
                                             x: frame_idx as f32 * offset.x,
                                             y: cel.layer_index as f32 * offset.y * -1.0,
-                                            width: main_data.header.width as f32 * pixel_width as f32,
-                                            height: main_data.header.height as f32 * pixel_height as f32,
+                                            width: image_width as f32 * pixel_width as f32,
+                                            height: image_height as f32 * pixel_height as f32,
                                         },
                                         hover: false
                                     });
