@@ -12,9 +12,14 @@ use super::ui_traits::ExpirableElement;
 
 const MAX_ZOOM_OUT: f32 = 20.00;
 const MAX_ZOOM_IN: f32 = 0.10;
+const ZOOM_LERP_SPEED: f32 = 0.4;
+
+const SCROLL_SENSITIVITY: f32 = 10.0;
 
 pub(crate) const FONT_SIZE_REG: i32 = 10;
 pub(crate) const FONT_SIZE_BIG: i32 = FONT_SIZE_REG * 2;
+
+const WORKSPACE_CLEAR_COLOUR: Color = Color{r: 8, g: 8, b: 8, a: 255};
 
 /// The distance the GUI icons for signifying resizablity on the layer list should
 /// be from center.
@@ -175,10 +180,10 @@ pub fn ui() {
                 }
             }
 
-            state.desired_zoom += rl.get_mouse_wheel_move() / 10.;
+            state.desired_zoom += rl.get_mouse_wheel_move() / SCROLL_SENSITIVITY;
             state.desired_zoom = state.desired_zoom.clamp(MAX_ZOOM_IN, MAX_ZOOM_OUT);
             
-            cam.zoom += (state.desired_zoom - cam.zoom) * 0.4;
+            cam.zoom += (state.desired_zoom - cam.zoom) * ZOOM_LERP_SPEED;
             
             if rl.is_mouse_button_down(MouseButton::MOUSE_BUTTON_RIGHT) {
                 state.desired_position -= rl.get_mouse_delta() / cam.zoom;
@@ -205,7 +210,7 @@ pub fn ui() {
         {
             let mut d = rl.begin_drawing(&thread);
             // d.clear_background(Color::RAYWHITE);
-            d.clear_background(Color{r: 8, g: 8, b: 8, a: 255});
+            d.clear_background(WORKSPACE_CLEAR_COLOUR);
 
             // draw cameraspace
             {
