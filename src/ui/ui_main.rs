@@ -106,7 +106,7 @@ pub fn ui() {
             if rl.is_file_dropped() {
                 let list = rl.load_dropped_files();
 
-                for fname in list.paths() {
+                'path: for fname in list.paths() {
                     for ext in ACCEPTED_TYPES {
                         if rl.is_file_extension(fname, ext) {
 
@@ -140,7 +140,7 @@ pub fn ui() {
 
                                     state.loaded_sprite = Some(new);
         
-                                    break
+                                    break 'path
                                 },
                                 Err(e) => {
                                     match e {
