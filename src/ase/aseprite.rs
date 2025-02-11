@@ -43,7 +43,7 @@ impl AsepriteString {
     }
 
     pub fn as_str(&self) -> Result<&str, std::str::Utf8Error> {
-        std::str::from_utf8(&self.data)
+        std::str::from_utf8(&self.data[..self.length as usize])
     }
 }
 
