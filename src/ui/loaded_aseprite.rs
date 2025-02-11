@@ -194,15 +194,15 @@ impl LoadedSprite {
                                         size:            Vector2 { x: cel.width.unwrap_or(0) as f32, y: cel.height.unwrap_or(0) as f32 },
                                         opacity:         cel.opacity,
                                         content_bounds:          Rectangle {
-                                            x: frame_idx as f32 + cel.x_pos as f32,
-                                            y: (cel.layer_index as f32 - cel.y_pos as f32) * -1.0,
-                                            width: cel.width.unwrap_or(0) as f32,
+                                            x:      frame_idx as f32 + cel.x_pos as f32,
+                                            y:      (cel.layer_index as f32 - cel.y_pos as f32) * -1.0,
+                                            width:  cel.width.unwrap_or(0) as f32,
                                             height: cel.height.unwrap_or(0) as f32
                                         },
                                         collision_bounds:       Rectangle{
-                                            x: frame_idx as f32 * offset.x,
-                                            y: cel.layer_index as f32 * offset.y * -1.0,
-                                            width: image_width as f32 * pixel_width as f32,
+                                            x:      frame_idx as f32 * offset.x,
+                                            y:      cel.layer_index as f32 * offset.y * -1.0,
+                                            width:  image_width as f32 * pixel_width as f32,
                                             height: image_height as f32 * pixel_height as f32,
                                         },
                                         hover: false
@@ -220,15 +220,15 @@ impl LoadedSprite {
                                     size:            Vector2 { x: image_width as f32, y: image_height as f32 },
                                     opacity:         255,
                                     content_bounds:          Rectangle {
-                                        x: frame_idx as f32,
-                                        y: cel.layer_index as f32 * -1.0,
-                                        width: image_width as f32,
+                                        x:      frame_idx as f32,
+                                        y:      cel.layer_index as f32 * -1.0,
+                                        width:  image_width as f32,
                                         height: image_height as f32
                                     },
                                     collision_bounds:       Rectangle{
-                                        x: frame_idx as f32 * offset.x,
-                                        y: cel.layer_index as f32 * offset.y * -1.0,
-                                        width: image_width as f32 * pixel_width as f32,
+                                        x:      frame_idx as f32 * offset.x,
+                                        y:      cel.layer_index as f32 * offset.y * -1.0,
+                                        width:  image_width as f32 * pixel_width as f32,
                                         height: image_height as f32 * pixel_height as f32,
                                     },
                                     hover: false
