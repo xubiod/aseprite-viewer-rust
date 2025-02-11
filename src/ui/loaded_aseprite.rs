@@ -7,7 +7,7 @@ use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, texture
 
 use crate::ase::aseprite::{self, Aseprite, AsepriteBlendMode, AsepriteError, AsepriteLayerFlags, AsepriteLayerType, AsepriteTagDirection};
 
-use super::ui_main::{FONT_SIZE_BIG, FONT_SIZE_REG};
+use super::ui_main::{self, FONT_SIZE_BIG, FONT_SIZE_REG};
 
 /// Used as the gap between cels on the grid.
 pub(crate) const GAP: u16 = 4;
@@ -490,6 +490,40 @@ impl LoadedSprite {
                 }, 
                 GAP as f32 + 1.,
                 Color{a: line_alpha/4, ..BIG_LINE_COLOR}
+            );
+        }
+
+        for (i, t) in self.loaded_tags.iter().enumerate() {
+            let tag_text = format!(
+                "{}\n{} {} {}",
+                t.name,
+                t.from,
+                match t.direction {
+                    AsepriteTagDirection::Forward         => ui_main::TAG_DIRECTION_FORWARD,
+                    AsepriteTagDirection::Reverse         => ui_main::TAG_DIRECTION_REVERSE,
+                    AsepriteTagDirection::PingPong        => ui_main::TAG_DIRECTION_FORWARD_PONG,
+                    AsepriteTagDirection::PingPongReverse => ui_main::TAG_DIRECTION_REVERSE_PONG,
+                },
+                t.to
+            );
+
+            let tag_text = tag_text.as_str();
+
+            let text_y = -((self.offset.y * self.loaded_layers.len() as f32 - 1.0) + 16.0) as i32 - ((i + 1) as i32 * FONT_SIZE_REG);
+
+            d.draw_text(tag_text,
+                ((self.offset.x) * (t.from as f32 - 1.0)) as i32 + self.image_width as i32,
+                text_y,
+                FONT_SIZE_REG,
+                LABEL_COLOR
+            );
+
+            let line_y = text_y + FONT_SIZE_REG as i32 + 4;
+
+            d.draw_line(
+                ((self.offset.x) * (t.from as f32 - 1.0)) as i32 + self.image_width as i32, line_y,
+                ((self.offset.x) * (t.to as f32 - 0.7)) as i32 + self.image_width as i32,line_y,
+                Color{a: (line_alpha as u16 * 2).clamp(0, 255) as u8, ..SMALL_LINE_COLOR}
             );
         }
 

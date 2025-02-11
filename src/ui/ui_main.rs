@@ -34,6 +34,11 @@ const TOAST_COLOR_ERROR: Color = Color::MAROON;
 //     spd: f32
 // }
 
+pub(crate) const TAG_DIRECTION_FORWARD:      &str = "->";
+pub(crate) const TAG_DIRECTION_REVERSE:      &str = "<-";
+pub(crate) const TAG_DIRECTION_FORWARD_PONG: &str = "->, <-";
+pub(crate) const TAG_DIRECTION_REVERSE_PONG: &str = "<-, ->";
+
 #[derive(Default)]
 pub struct UIState {
     loaded_sprite: Option<LoadedSprite>,
