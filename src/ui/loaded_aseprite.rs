@@ -268,10 +268,7 @@ impl LoadedSprite {
 
         let frame_count = main_data.frames.len();
         let mut r = Self {
-            loaded_cels, loaded_layers, loaded_tags, frame_count,
-
-            offset,
-
+            loaded_cels, loaded_layers, loaded_tags, frame_count, offset,
             image_width, image_height, pixel_width, pixel_height,
 
             cached_list: None
