@@ -10,9 +10,9 @@ use super::loaded_aseprite::{LoadedSprite, GAP};
 use super::toast::Toast;
 use super::ui_traits::ExpirableElement;
 
-const MAX_ZOOM_OUT: f32 = 20.00;
-const MAX_ZOOM_IN: f32 = 0.10;
-const ZOOM_LERP_SPEED: f32 = 0.4;
+const MAX_ZOOM_OUT:    f32 = 20.00;
+const MAX_ZOOM_IN:     f32 =  0.10;
+const ZOOM_LERP_SPEED: f32 =  0.4;
 
 const SCROLL_SENSITIVITY: f32 = 10.0;
 
@@ -37,10 +37,10 @@ const TOAST_COLOR_ERROR: Color = Color::MAROON;
 #[derive(Default)]
 pub struct UIState {
     loaded_sprite: Option<LoadedSprite>,
-    toasts: Vec<Toast>,
+    toasts:        Vec<Toast>,
 
     desired_zoom: f32,
-    fit_zoom: f32,
+    fit_zoom:     f32,
 
     desired_position: Vector2,
     default_position: Vector2,
@@ -53,10 +53,10 @@ pub struct UIState {
     // particles: Vec<Part>,
 
     pub layer_list_visible: bool,
-    layer_list_width: f32,
-    layer_list_resizing: bool,
-    layer_list_scroll: i32,
-    layer_list_active: i32,
+    layer_list_width:       f32,
+    layer_list_resizing:    bool,
+    layer_list_scroll:      i32,
+    layer_list_active:      i32,
 }
 
 const ACCEPTED_TYPES: [&str; 2] = [".ase", ".aseprite"];

@@ -44,7 +44,7 @@ pub struct PreparedCel {
 
     linked_to_frame: Option<u16>,
 
-    content_bounds: Rectangle,
+    content_bounds:   Rectangle,
     collision_bounds: Rectangle,
 
     hover: bool

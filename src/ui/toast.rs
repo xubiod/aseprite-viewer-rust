@@ -3,8 +3,8 @@ use raylib::{color::Color, math::Rectangle, prelude::{RaylibDraw, RaylibDrawHand
 use super::{ui_main::FONT_SIZE_REG, ui_traits::ExpirableElement};
 
 pub struct Toast {
-    text: String,
-    timer: i32,
+    text:        String,
+    timer:       i32,
     start_timer: i32,
 
     background: Color,
