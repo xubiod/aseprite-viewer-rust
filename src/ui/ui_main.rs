@@ -336,10 +336,20 @@ fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
                     let arrows_height = (resize_area.height / 2.) as i32;
 
                     if state.layer_list_width > lo_resize_bound {
-                        ffi::GuiDrawIcon(118, (resize_area.x - LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height, 1, LAYER_RESIZE_COLOUR.into());
+                        ffi::GuiDrawIcon(
+                            118,
+                            (resize_area.x - LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height,
+                            1,
+                            LAYER_RESIZE_COLOUR.into()
+                        );
                     }
                     if state.layer_list_width < hi_resize_bound {
-                        ffi::GuiDrawIcon(119, (resize_area.x + LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height, 1, LAYER_RESIZE_COLOUR.into());
+                        ffi::GuiDrawIcon(
+                            119,
+                            (resize_area.x + LAYER_RESIZE_ICON_SPREAD) as i32, arrows_height,
+                            1,
+                            LAYER_RESIZE_COLOUR.into()
+                        );
                     }
                 };
 
