@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::ops::{Div, Mul, Sub};
 use std::usize;
 use std::{f32::consts::FRAC_PI_3, ffi::CString, fs::File};
 
@@ -517,10 +518,25 @@ impl LoadedSprite {
 
             let line_y = text_y + FONT_SIZE_REG as i32 + 4;
 
+            let from_x = ((self.offset.x) * (t.from as f32 - 1.0)) as i32 + self.image_width as i32;
+            let to_x = ((self.offset.x) * (t.to as f32 - 0.7)) as i32 + self.image_width as i32;
+
             d.draw_line(
-                ((self.offset.x) * (t.from as f32 - 1.0)) as i32 + self.image_width as i32, line_y,
-                ((self.offset.x) * (t.to as f32 - 0.7)) as i32 + self.image_width as i32,line_y,
+                from_x, line_y,
+                to_x,line_y,
                 Color{a: (line_alpha as u16 * 2).clamp(0, 255) as u8, ..SMALL_LINE_COLOR}
+            );
+
+            let path = match t.direction {
+                AsepriteTagDirection::Forward         =>       d.get_time().div(2.0).fract(),
+                AsepriteTagDirection::Reverse         => 1.0 - d.get_time().div(2.0).fract(),
+                AsepriteTagDirection::PingPong        => 1.0 - d.get_time().div(2.0).fract().mul(2.0).sub(1.0).abs(),
+                AsepriteTagDirection::PingPongReverse =>       d.get_time().div(2.0).fract().mul(2.0).sub(1.0).abs(),
+            };
+
+            d.draw_circle(
+                from_x + ((to_x - from_x) as f64 * path) as i32, line_y,
+                2.0, Color{a: (line_alpha as u16 * 2).clamp(0, 255) as u8, ..SMALL_LINE_COLOR}
             );
         }
 
