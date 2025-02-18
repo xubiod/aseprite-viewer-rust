@@ -422,7 +422,8 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
 
     while from.read(&mut frame_buffer).unwrap_or(0) > 0 {
         if result.header.frames < frame_count {
-            println!("frame count in header is lower than what is in file, continuing..\n-> decoding frame no. {frame_count} when header states only {} frames", result.header.frames)
+            println!("frame count in header is lower than what is in file, continuing..");
+            println!("-> decoding frame no. {frame_count} when header states only {} frames", result.header.frames);
         }
 
         let mut frame = AsepriteFrame{
