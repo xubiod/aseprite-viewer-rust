@@ -417,6 +417,10 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
         return Err(AsepriteError::HeaderMagicMismatch);
     }
 
+    if result.header.flags & 0x1 == 0 {
+        println!("file has an invalid layer opacity value flag unset, continuing..")
+    }
+
     let mut frame_buffer: Vec<u8> = vec![];
     frame_buffer.reserve(16);
     frame_buffer.resize(frame_buffer.capacity(), 0);
