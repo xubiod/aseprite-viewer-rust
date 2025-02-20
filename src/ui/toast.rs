@@ -9,12 +9,13 @@ pub struct Toast {
 
     background: Color,
 
-    bounds: Rectangle
+    bounds:   Rectangle,
+    immortal: bool
 }
 
 impl ExpirableElement for Toast {
     fn is_alive(&self) -> bool {
-        self.timer > 0
+        self.immortal || self.timer > 0
     }
 }
 
@@ -25,7 +26,8 @@ impl Toast {
             start_timer: timer,
             timer,
             bounds: Rectangle { ..Default::default() },
-            background: Color{a: 192, ..Color::BLACK}
+            background: Color{a: 192, ..Color::BLACK},
+            immortal: false
         }
     }
 
@@ -44,21 +46,23 @@ impl Toast {
         };
 
         d.draw_rectangle_rec(self.bounds, self.background);
-        d.draw_rectangle_rec(Rectangle{
-            x: self.bounds.x + 1.,
-            y: self.bounds.y + self.bounds.height - 3.,
-            width: self.bounds.width * (self.timer as f32 / self.start_timer as f32) - 2.,
-            height: 2.
-        }, Color::WHITESMOKE);
-
-        // d.draw_text(
-        //     format!("{0:.1}s", self.timer as f32 / 60.).as_str(), 
-        //     (self.bounds.x + self.bounds.width) as i32 - 16,
-        //     (self.bounds.y + self.bounds.height) as i32 - 5,
-        //     5, Color{a: 127, ..Color::WHITE}
-        // );
-        
         d.draw_text(&self.text, (self.bounds.x + padding * 2.) as i32, (self.bounds.y + padding) as i32, FONT_SIZE_REG, Color::WHITE);
+
+        if !self.immortal {
+            d.draw_rectangle_rec(Rectangle{
+                x: self.bounds.x + 1.,
+                y: self.bounds.y + self.bounds.height - 3.,
+                width: self.bounds.width * (self.timer as f32 / self.start_timer as f32) - 2.,
+                height: 2.
+            }, Color::WHITESMOKE);
+
+            // d.draw_text(
+            //     format!("{0:.1}s", self.timer as f32 / 60.).as_str(), 
+            //     (self.bounds.x + self.bounds.width) as i32 - 16,
+            //     (self.bounds.y + self.bounds.height) as i32 - 5,
+            //     5, Color{a: 127, ..Color::WHITE}
+            // );
+        }
     }
 
     pub fn step(&mut self, rl: &RaylibHandle) {
