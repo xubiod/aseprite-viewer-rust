@@ -1,4 +1,4 @@
-use raylib::{color::Color, math::Rectangle, prelude::{RaylibDraw, RaylibDrawHandle}, RaylibHandle};
+use raylib::{color::Color, ffi::MouseButton, math::Rectangle, prelude::{RaylibDraw, RaylibDrawHandle}, RaylibHandle};
 
 use super::{ui_main::FONT_SIZE_REG, ui_traits::ExpirableElement};
 
@@ -69,7 +69,11 @@ impl Toast {
         self.timer = self.timer - 1;
         
         if self.bounds.check_collision_point_rec(rl.get_mouse_position()) {
-            self.timer = self.start_timer
+            self.timer = self.start_timer;
+            if rl.is_mouse_button_pressed(MouseButton::MOUSE_BUTTON_LEFT) {
+                self.immortal = false;
+                self.timer = 0;
+            }
         }
     }
 
