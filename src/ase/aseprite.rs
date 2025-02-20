@@ -56,7 +56,7 @@ pub struct AsepriteHeader {
 	pub height:          u16,
 	pub colour_depth:    u16,
 	pub flags:           u32,
-	// pub speed:           u16,
+	pub speed:           u16,
 	    // zero:            [u8; 8],
 	// pub palette_entry:   u8,
 	    // ignore:          [u8; 3],
@@ -397,7 +397,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
             height:        slice_to!(u16, &header[10..12]),
             colour_depth:  slice_to!(u16, &header[12..14]),
             flags:         slice_to!(u32, &header[14..18]),
-            // speed:         slice_to!(u16, &header[18..20]),
+            speed:         slice_to!(u16, &header[18..20]),
             // zero:          slice_cnt!(header, 20, 8),
             // palette_entry: header[28],
             // ignore:        slice_cnt!(header, 29, 3),
@@ -438,6 +438,10 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
             chunk_count:    slice_to!(u32, &frame_buffer[12..16]),
             chunks:         Vec::new(),
         };
+
+        if frame.frame_duration == 0 {
+            frame.frame_duration = result.header.speed
+        }
 
         if frame.magic != ASEPRITE_MAGIC_FRAMES {
             return Err(AsepriteError::FrameMagicMismatch);
