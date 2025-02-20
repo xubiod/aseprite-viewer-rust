@@ -15,6 +15,7 @@ macro_rules! slice_to {
 /// `slice_cnt!( vec : identifer, from : expression, length : literal )`
 /// 
 /// `vec` is expected to be a vector of bytes.
+#[allow(unused_macros)]
 macro_rules! slice_cnt {
     ($vec: ident, $from: expr, $length: literal) => { $vec[$from..($from+$length)].try_into().unwrap_or([0; $length]) };
 }
@@ -55,10 +56,10 @@ pub struct AsepriteHeader {
 	pub height:          u16,
 	pub colour_depth:    u16,
 	pub flags:           u32,
-	pub speed:           u16,
-	    zero:            [u8; 8],
-	pub palette_entry:   u8,
-	    ignore:          [u8; 3],
+	// pub speed:           u16,
+	    // zero:            [u8; 8],
+	// pub palette_entry:   u8,
+	    // ignore:          [u8; 3],
 	pub colour_count:    u16,
 	pub pixel_width:     u8,
 	pub pixel_height:    u8,
@@ -67,7 +68,7 @@ pub struct AsepriteHeader {
 	pub grid_width:      u16,
 	pub grid_height:     u16,
 
-    future:          [u8; 84]
+    // future:          [u8; 84]
 }
 
 pub struct AsepriteFrame {
@@ -75,7 +76,7 @@ pub struct AsepriteFrame {
     pub magic: u16,
     pub old_chunks: u16,
     pub frame_duration: u16,
-    future: [u8; 2],
+    // future: [u8; 2],
 
     pub chunk_count: u32,
     pub chunks: Vec<Chunk>
@@ -207,14 +208,14 @@ pub struct AsepriteLayerChunk {
     pub flags: u16,
     pub layer_type: AsepriteLayerType,
     pub child_level: u16,
-        default_width: u16,
-        default_height: u16,
+        // default_width: u16,
+        // default_height: u16,
     pub blend_mode: AsepriteBlendMode,
     pub opacity: u8,
-        future: [u8; 3],
+        // future: [u8; 3],
     pub name: AsepriteString,
 
-    pub tileset_index: Option<u32> // only if layer type == 2
+    // pub tileset_index: Option<u32> // only if layer type == 2
 }
 
 #[repr(u16)]
@@ -276,7 +277,7 @@ pub struct AsepriteCelChunk {
     pub opacity: u8,
     pub cel_type: AsepriteCelType,
     pub z_index: i16,
-        future: [u8; 5],
+        // future: [u8; 5],
 
     // cel type 0
     pub width: Option<u16>,
@@ -330,7 +331,7 @@ impl Display for AsepriteTagDirection {
 const ASEPRITE_TAG_CHUNK_MAGIC: u16 = 0x2018;
 pub struct AsepriteTagChunk {
     pub tag_count: u16,
-        future: [u8; 8],
+        // future: [u8; 8],
 
     pub tags: Vec<AsepriteTag>
 }
@@ -340,9 +341,9 @@ pub struct AsepriteTag {
     pub to: u16,
     pub direction: AsepriteTagDirection,
     pub repeat_count: u16,
-        reserved: [u8; 6],
-        colour: [u8; 3],
-        extra: u8,
+        // reserved: [u8; 6],
+        // colour: [u8; 3],
+        // extra: u8,
     pub name: AsepriteString
 }
 
@@ -375,13 +376,15 @@ impl Display for AsepriteError {
     }
 }
 
+const READ_HEADER_SIZE: usize = 128; // size_of::<AsepriteHeader>();
+
 pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteError> {
     let mut header: Vec<u8> = vec![];
-    header.reserve(size_of::<AsepriteHeader>());
+    header.reserve(READ_HEADER_SIZE);
     header.resize(header.capacity(), 0);
     
     match from.read(&mut header) {
-        Ok(count) => if count != size_of::<AsepriteHeader>() { return Err(AsepriteError::RanOutAtHeader) },
+        Ok(count) => if count != READ_HEADER_SIZE { return Err(AsepriteError::RanOutAtHeader) },
         Err(e) => return Err(AsepriteError::Other(Box::new(e)))
     };
     
@@ -394,10 +397,10 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
             height:        slice_to!(u16, &header[10..12]),
             colour_depth:  slice_to!(u16, &header[12..14]),
             flags:         slice_to!(u32, &header[14..18]),
-            speed:         slice_to!(u16, &header[18..20]),
-            zero:          slice_cnt!(header, 20, 8),
-            palette_entry: header[28],
-            ignore:        slice_cnt!(header, 29, 3),
+            // speed:         slice_to!(u16, &header[18..20]),
+            // zero:          slice_cnt!(header, 20, 8),
+            // palette_entry: header[28],
+            // ignore:        slice_cnt!(header, 29, 3),
             colour_count:  slice_to!(u16, &header[32..34]),
             pixel_width:   header[34],
             pixel_height:  header[35],
@@ -405,7 +408,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
             grid_ypos:     slice_to!(i16, &header[38..40]),
             grid_width:    slice_to!(u16, &header[40..42]),
             grid_height:   slice_to!(u16, &header[42..44]),
-            future:        slice_cnt!(header, 44, 84)
+            // future:        slice_cnt!(header, 44, 84)
         },
         frames: Default::default(),
     };
@@ -431,7 +434,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
             magic:          slice_to!(u16, &frame_buffer[04..06]),
             old_chunks:     slice_to!(u16, &frame_buffer[06..08]),
             frame_duration: slice_to!(u16, &frame_buffer[08..10]),
-            future:         slice_cnt!(frame_buffer, 10, 2),
+            // future:         slice_cnt!(frame_buffer, 10, 2),
             chunk_count:    slice_to!(u32, &frame_buffer[12..16]),
             chunks:         Vec::new(),
         };
@@ -479,18 +482,18 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
                             flags:          slice_to!(u16, &data[06..08]),
                             // layer_type                       [08..10]
                             child_level:    slice_to!(u16, &data[10..12]),
-                            default_width:  slice_to!(u16, &data[12..14]),
-                            default_height: slice_to!(u16, &data[14..16]),
+                            // default_width:  slice_to!(u16, &data[12..14]),
+                            // default_height: slice_to!(u16, &data[14..16]),
                             blend_mode:     AsepriteBlendMode::from(slice_to!(u16, &data[16..18])),
                             opacity:        data[18],
-                            future:         slice_cnt!(data, 19, 3),
+                            // future:         slice_cnt!(data, 19, 3),
                             name:           AsepriteString::read_from_bytes(
                                                 &data[22..(data.len() - if is_tilemap { 4 } else { 0 })]
                                             ),
                             
-                            tileset_index:  if is_tilemap {
-                                                Some(slice_to!(u32, &data[data.len()-4..data.len()]))
-                                            } else { None },
+                            // tileset_index:  if is_tilemap {
+                            //                     Some(slice_to!(u32, &data[data.len()-4..data.len()]))
+                            //                 } else { None },
                             
                             layer_type
                         })
@@ -503,7 +506,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
                             opacity:     data[12],
                             cel_type:    AsepriteCelType::from(slice_to!(u16, &data[13..15])),
                             z_index:     slice_to!(i16, &data[15..17]),
-                            future:      slice_cnt!(data, 17, 5),
+                            // future:      slice_cnt!(data, 17, 5),
                             
                             // cel specific fields set below
                             // cel type 0
@@ -562,7 +565,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
                     ASEPRITE_TAG_CHUNK_MAGIC => {
                         let mut tag_data = AsepriteTagChunk {
                             tag_count:  slice_to!(u16, &data[06..08]),
-                            future:     slice_cnt!(data, 8, 8),
+                            // future:     slice_cnt!(data, 8, 8),
                             tags:       Vec::<AsepriteTag>::new() 
                         };
 
@@ -575,9 +578,9 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
                                 to:             slice_to!(u16, &data[(02 + offset)..(04 + offset)]),
                                 direction:      AsepriteTagDirection::from(data[4 + offset]),
                                 repeat_count:   slice_to!(u16, &data[(05 + offset)..(07 + offset)]),
-                                reserved:       slice_cnt!(data, {7 + offset}, 6),
-                                colour:         slice_cnt!(data, {13 + offset}, 3),
-                                extra:          data[ 16 + offset],
+                                // reserved:       slice_cnt!(data, {7 + offset}, 6),
+                                // colour:         slice_cnt!(data, {13 + offset}, 3),
+                                // extra:          data[ 16 + offset],
                                 name:           AsepriteString::read_from_bytes(
                                                     &data[(17 + offset)..((19 + offset) + name_len)]
                                                 )
