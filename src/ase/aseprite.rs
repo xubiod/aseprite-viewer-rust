@@ -453,7 +453,9 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
 
         let frames_end = from.stream_position().unwrap_or_default() + frame.size as u64;
 
-        for _ in 0..frame.chunk_count {
+        let file_chunk_count = if frame.chunk_count == 0 { frame.old_chunks as u32 } else { frame.chunk_count };
+
+        for _ in 0..file_chunk_count {
             let current_position = from.stream_position().unwrap_or_default();
 
             if current_position >= frames_end {
