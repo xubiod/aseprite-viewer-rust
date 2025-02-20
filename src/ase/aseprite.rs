@@ -71,6 +71,8 @@ pub struct AsepriteHeader {
     // future:          [u8; 84]
 }
 
+const READ_HEADER_SIZE: usize = 128; // size_of::<AsepriteHeader>();
+
 pub struct AsepriteFrame {
     pub size: u32,
     pub magic: u16,
@@ -375,8 +377,6 @@ impl Display for AsepriteError {
         }
     }
 }
-
-const READ_HEADER_SIZE: usize = 128; // size_of::<AsepriteHeader>();
 
 pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteError> {
     let mut header: Vec<u8> = vec![];
