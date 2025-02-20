@@ -276,7 +276,7 @@ pub struct AsepriteCelChunk {
     pub y_pos: i16,
     pub opacity: u8,
     pub cel_type: AsepriteCelType,
-    pub z_index: i16,
+    // pub z_index: i16,
         // future: [u8; 5],
 
     // cel type 0
@@ -513,7 +513,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
                             y_pos:       slice_to!(i16, &data[10..12]),
                             opacity:     data[12],
                             cel_type:    AsepriteCelType::from(slice_to!(u16, &data[13..15])),
-                            z_index:     slice_to!(i16, &data[15..17]),
+                            // z_index:     slice_to!(i16, &data[15..17]),
                             // future:      slice_cnt!(data, 17, 5),
                             
                             // cel specific fields set below
