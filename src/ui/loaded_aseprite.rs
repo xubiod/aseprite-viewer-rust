@@ -287,6 +287,10 @@ impl LoadedSprite {
         let scale_y: i32 = self.pixel_height.into();
 
         for img in self.loaded_cels.iter() {
+            if !img.collision_bounds.check_collision_recs(visible_area) {
+                continue;
+            }
+
             let my_layer = &self.loaded_layers[img.layer_index as usize];
 
             if !self.is_layer_visible(img.layer_index as usize) {
@@ -309,7 +313,7 @@ impl LoadedSprite {
                 rect_colour
             );
 
-            if img.collision_bounds.check_collision_recs(visible_area) {
+            // if img.collision_bounds.check_collision_recs(visible_area) {
                 if let Some(link) = img.linked_to_frame {
                     if img.hover {
                         d.draw_line_ex(
@@ -400,7 +404,7 @@ impl LoadedSprite {
                 }
 
                 if DEBUG_VISUALS { d.draw_rectangle_lines_ex(img.collision_bounds, 2.0, ERR_COLOR); }
-            }
+            // }
         }
 
         let line_alpha = (24. * cam.zoom).clamp(0., 255.) as u8;
