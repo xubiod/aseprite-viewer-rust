@@ -211,6 +211,16 @@ pub fn ui() {
             state.toasts.retain(|i| i.is_alive());
         }
 
+        let top_left_cam = rl.get_screen_to_world2D(Vector2{x: 0.0, y: 0.0}, cam);
+        let bot_rig_cam = rl.get_screen_to_world2D(Vector2{x: rl.get_screen_width() as f32, y: rl.get_screen_height() as f32}, cam);
+
+        let visible_area: Rectangle = Rectangle { 
+            x: top_left_cam.x,
+            y: top_left_cam.y,
+            width: bot_rig_cam.x - top_left_cam.x,
+            height: bot_rig_cam.y - top_left_cam.y,
+        };
+
         // draw
         {
             let mut d = rl.begin_drawing(&thread);
@@ -239,8 +249,10 @@ pub fn ui() {
                 // }
                 
                 if let Some(ref mut spr) = state.loaded_sprite {
-                    spr.draw(&mut d, &cam);
+                    spr.draw(&mut d, &cam, &visible_area);
                 }
+
+                // d.draw_rectangle_lines_ex(visible_area, 4.0, Color::MAGENTA);
             }
 
             // draw screenspace
