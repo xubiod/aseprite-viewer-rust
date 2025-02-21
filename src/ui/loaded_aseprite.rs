@@ -287,15 +287,11 @@ impl LoadedSprite {
         let scale_y: i32 = self.pixel_height.into();
 
         for img in self.loaded_cels.iter() {
-            if !img.collision_bounds.check_collision_recs(visible_area) {
+            if !img.collision_bounds.check_collision_recs(visible_area) || !self.is_layer_visible(img.layer_index as usize) {
                 continue;
             }
 
             let my_layer = &self.loaded_layers[img.layer_index as usize];
-
-            if !self.is_layer_visible(img.layer_index as usize) {
-                continue;
-            }
 
             let rect_colour = Color{
                 a: if img.hover { 96 } else { 32 },
@@ -313,98 +309,96 @@ impl LoadedSprite {
                 rect_colour
             );
 
-            // if img.collision_bounds.check_collision_recs(visible_area) {
-                if let Some(link) = img.linked_to_frame {
-                    if img.hover {
-                        d.draw_line_ex(
-                            Vector2{
-                                x: (img.frame_index as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)), 
-                                y: (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) * -1.0
-                            },
-                            Vector2{
-                                x: (link as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)),
-                                y: (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) * -1.0
-                            },
-                            3.0,
-                            rect_colour
-                        );
-
-                        d.draw_circle(
-                            (link as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)) as i32, 
-                            (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) as i32 * -1, 
-                            6.0 + f32::sin(d.get_time() as f32 * 1.7) * 2.4,
-                            rect_colour
-                        );
-
-                        for i in 0..(img.frame_index as u16 - link) {
-                            let cx = ((link + i + 1) as f32 - d.get_time().fract() as f32) * (self.offset.x) + (self.image_width as f32 / 2.0);
-                            let cy = (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) * -1.0;
-                            let r = 3.5;
-
-                            let v1 = Vector2{
-                                x: cx + (r * f32::cos(1.0 * FRAC_PI_3)),
-                                y: cy + (r * f32::sin(1.0 * FRAC_PI_3))
-                            };
-
-                            let v2 = Vector2{
-                                x: cx + (r * f32::cos(3.0 * FRAC_PI_3)),
-                                y: cy + (r * f32::sin(3.0 * FRAC_PI_3))
-                            };
-
-                            let v3 = Vector2{
-                                x: cx + (r * f32::cos(5.0 * FRAC_PI_3)),
-                                y: cy + (r * f32::sin(5.0 * FRAC_PI_3))
-                            };
-
-                            d.draw_triangle(
-                                v1,
-                                v2,
-                                v3, 
-                                ERR_COLOR//rect_colour
-                            );
-
-                            d.draw_circle_v(v1, r, rect_colour);
-                            d.draw_circle_v(v2, r, rect_colour);
-                            d.draw_circle_v(v3, r, rect_colour);
-                        }
-                    }
-
-                    let tx = (img.frame_index as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)) as i32;
-                    let ty = (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0) + 16.) as i32 * -1;
-                    
-                    d.draw_text(
-                        format!("{}", link).as_str(), 
-                        tx,
-                        ty,
-                        FONT_SIZE_BIG,
+            if let Some(link) = img.linked_to_frame {
+                if img.hover {
+                    d.draw_line_ex(
+                        Vector2{
+                            x: (img.frame_index as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)), 
+                            y: (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) * -1.0
+                        },
+                        Vector2{
+                            x: (link as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)),
+                            y: (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) * -1.0
+                        },
+                        3.0,
                         rect_colour
                     );
-                } else if let Some(texture) = &img.texture {
-                    d.draw_texture_pro(texture,
-                        Rectangle{
-                            x:      0.0,
-                            y:      0.0,
-                            width:  img.size.x,
-                            height: img.size.y,
-                        }, 
-                        Rectangle{
-                            x: (img.content_bounds.x + (img.frame_index as f32 * (self.offset.x - 1.0))) * scale_x as f32,
-                            y: (img.content_bounds.y - (img.layer_index as f32 * (self.offset.y - 1.0))) * scale_y as f32,
-                            width: img.size.x * scale_x as f32,
-                            height: img.size.y * scale_y as f32,
-                        }, 
-                        Vector2{ x: 0.0, y: 0.0 }, 
-                        0.0, 
-                        Color{a: {
-                            let l = (my_layer.opacity as f64) / 255.0;
-                            let r = (img.opacity as f64) / 255.0;
-                            (l * r * 255.0).round().clamp(0.0, 255.0) as u8
-                        }, ..Color::WHITE}
+
+                    d.draw_circle(
+                        (link as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)) as i32, 
+                        (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) as i32 * -1, 
+                        6.0 + f32::sin(d.get_time() as f32 * 1.7) * 2.4,
+                        rect_colour
                     );
+
+                    for i in 0..(img.frame_index as u16 - link) {
+                        let cx = ((link + i + 1) as f32 - d.get_time().fract() as f32) * (self.offset.x) + (self.image_width as f32 / 2.0);
+                        let cy = (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) * -1.0;
+                        let r = 3.5;
+
+                        let v1 = Vector2{
+                            x: cx + (r * f32::cos(1.0 * FRAC_PI_3)),
+                            y: cy + (r * f32::sin(1.0 * FRAC_PI_3))
+                        };
+
+                        let v2 = Vector2{
+                            x: cx + (r * f32::cos(3.0 * FRAC_PI_3)),
+                            y: cy + (r * f32::sin(3.0 * FRAC_PI_3))
+                        };
+
+                        let v3 = Vector2{
+                            x: cx + (r * f32::cos(5.0 * FRAC_PI_3)),
+                            y: cy + (r * f32::sin(5.0 * FRAC_PI_3))
+                        };
+
+                        d.draw_triangle(
+                            v1,
+                            v2,
+                            v3, 
+                            ERR_COLOR//rect_colour
+                        );
+
+                        d.draw_circle_v(v1, r, rect_colour);
+                        d.draw_circle_v(v2, r, rect_colour);
+                        d.draw_circle_v(v3, r, rect_colour);
+                    }
                 }
 
-                if DEBUG_VISUALS { d.draw_rectangle_lines_ex(img.collision_bounds, 2.0, ERR_COLOR); }
-            // }
+                let tx = (img.frame_index as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)) as i32;
+                let ty = (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0) + 16.) as i32 * -1;
+                
+                d.draw_text(
+                    format!("{}", link).as_str(), 
+                    tx,
+                    ty,
+                    FONT_SIZE_BIG,
+                    rect_colour
+                );
+            } else if let Some(texture) = &img.texture {
+                d.draw_texture_pro(texture,
+                    Rectangle{
+                        x:      0.0,
+                        y:      0.0,
+                        width:  img.size.x,
+                        height: img.size.y,
+                    }, 
+                    Rectangle{
+                        x: (img.content_bounds.x + (img.frame_index as f32 * (self.offset.x - 1.0))) * scale_x as f32,
+                        y: (img.content_bounds.y - (img.layer_index as f32 * (self.offset.y - 1.0))) * scale_y as f32,
+                        width: img.size.x * scale_x as f32,
+                        height: img.size.y * scale_y as f32,
+                    }, 
+                    Vector2{ x: 0.0, y: 0.0 }, 
+                    0.0, 
+                    Color{a: {
+                        let l = (my_layer.opacity as f64) / 255.0;
+                        let r = (img.opacity as f64) / 255.0;
+                        (l * r * 255.0).round().clamp(0.0, 255.0) as u8
+                    }, ..Color::WHITE}
+                );
+            }
+
+            if DEBUG_VISUALS { d.draw_rectangle_lines_ex(img.collision_bounds, 2.0, ERR_COLOR); }
         }
 
         let line_alpha = (24. * cam.zoom).clamp(0., 255.) as u8;
