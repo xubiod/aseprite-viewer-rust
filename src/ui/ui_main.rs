@@ -262,7 +262,7 @@ pub fn ui() {
                     None => {
                         let tx = "drag and drop an aseprite file..";
                         let tx_w = d.measure_text(tx,FONT_SIZE_BIG);
-                        d.draw_text(&tx, (state.window_w - tx_w)/2, (state.window_h/2)-12, FONT_SIZE_BIG, Color::RAYWHITE);
+                        d.draw_text(tx, (state.window_w - tx_w)/2, (state.window_h/2)-12, FONT_SIZE_BIG, Color::RAYWHITE);
                     },
                 };
 

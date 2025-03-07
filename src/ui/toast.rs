@@ -66,7 +66,7 @@ impl Toast {
     }
 
     pub fn step(&mut self, rl: &RaylibHandle) {
-        self.timer = self.timer - 1;
+        self.timer -= 1;
         
         if self.bounds.check_collision_point_rec(rl.get_mouse_position()) {
             self.timer = self.start_timer;

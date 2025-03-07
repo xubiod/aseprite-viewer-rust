@@ -47,7 +47,7 @@ fn open_test() -> io::Result<()> {
                     println!("\t{4}\n\t\t\t@ on layer idx {7}; {0}, {1}; {2} by {3}\n\t\t\t{5}b\n\t\t\tlinked to {6}",
                         cchunk.x_pos, cchunk.y_pos, cchunk.width.unwrap_or(0), cchunk.height.unwrap_or(0),
                         cchunk.cel_type,
-                        cchunk.raw_data.unwrap_or(cchunk.compressed_data.unwrap_or(vec![0].into()).into()).len(),
+                        cchunk.raw_data.unwrap_or(cchunk.compressed_data.unwrap_or(vec![0].into())).len(),
                         cchunk.linked_to.unwrap_or(0xFFFF),
                         cchunk.layer_index
                     )

@@ -111,16 +111,16 @@ pub struct RawAsepriteChunk {
 #[repr(u16)]
 #[derive(Clone, Copy)]
 pub enum AsepriteBlendMode {
-    Normal     = 00,
-    Multiply   = 01,
-    Screen     = 02,
-    Overlay    = 03,
-    Darken     = 04,
-    Lighten    = 05,
-    ColorDodge = 06,
-    ColorBurn  = 07,
-    HardLight  = 08,
-    SoftLight  = 09,
+    Normal     =  0,
+    Multiply   =  1,
+    Screen     =  2,
+    Overlay    =  3,
+    Darken     =  4,
+    Lighten    =  5,
+    ColorDodge =  6,
+    ColorBurn  =  7,
+    HardLight  =  8,
+    SoftLight  =  9,
     Difference = 10,
     Exclusion  = 11,
     Hue        = 12,
@@ -135,16 +135,16 @@ pub enum AsepriteBlendMode {
 impl From<u16> for AsepriteBlendMode {
     fn from(value: u16) -> Self {
         match value % 19 {
-            00 => Self::Normal,
-            01 => Self::Multiply,
-            02 => Self::Screen,
-            03 => Self::Overlay,
-            04 => Self::Darken,
-            05 => Self::Lighten,
-            06 => Self::ColorDodge,
-            07 => Self::ColorBurn,
-            08 => Self::HardLight,
-            09 => Self::SoftLight,
+             0 => Self::Normal,
+             1 => Self::Multiply,
+             2 => Self::Screen,
+             3 => Self::Overlay,
+             4 => Self::Darken,
+             5 => Self::Lighten,
+             6 => Self::ColorDodge,
+             7 => Self::ColorBurn,
+             8 => Self::HardLight,
+             9 => Self::SoftLight,
             10 => Self::Difference,
             11 => Self::Exclusion,
             12 => Self::Hue,
@@ -379,9 +379,7 @@ impl Display for AsepriteError {
 }
 
 pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteError> {
-    let mut header: Vec<u8> = vec![];
-    header.reserve(READ_HEADER_SIZE);
-    header.resize(header.capacity(), 0);
+    let mut header: Vec<u8> = vec![0; READ_HEADER_SIZE];
     
     match from.read(&mut header) {
         Ok(count) => if count != READ_HEADER_SIZE { return Err(AsepriteError::RanOutAtHeader) },
@@ -390,10 +388,10 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
     
     let mut result = Aseprite{
         header: AsepriteHeader{
-            fsize:         slice_to!(u32, &header[00..04]),
-            magic:         slice_to!(u16, &header[04..06]),
-            frames:        slice_to!(u16, &header[06..08]),
-            width:         slice_to!(u16, &header[08..10]),
+            fsize:         slice_to!(u32, &header[ 0.. 4]),
+            magic:         slice_to!(u16, &header[ 4.. 6]),
+            frames:        slice_to!(u16, &header[ 6.. 8]),
+            width:         slice_to!(u16, &header[ 8..10]),
             height:        slice_to!(u16, &header[10..12]),
             colour_depth:  slice_to!(u16, &header[12..14]),
             flags:         slice_to!(u32, &header[14..18]),
@@ -421,9 +419,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
         println!("file has an invalid layer opacity value flag unset, continuing..")
     }
 
-    let mut frame_buffer: Vec<u8> = vec![];
-    frame_buffer.reserve(16);
-    frame_buffer.resize(frame_buffer.capacity(), 0);
+    let mut frame_buffer: Vec<u8> = vec![0; 16];
 
     let mut frame_count = 0;
 
@@ -434,10 +430,10 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
         }
 
         let mut frame = AsepriteFrame{
-            size:           slice_to!(u32, &frame_buffer[00..04]),
-            magic:          slice_to!(u16, &frame_buffer[04..06]),
-            old_chunks:     slice_to!(u16, &frame_buffer[06..08]),
-            frame_duration: slice_to!(u16, &frame_buffer[08..10]),
+            size:           slice_to!(u32, &frame_buffer[ 0.. 4]),
+            magic:          slice_to!(u16, &frame_buffer[ 4.. 6]),
+            old_chunks:     slice_to!(u16, &frame_buffer[ 6.. 8]),
+            frame_duration: slice_to!(u16, &frame_buffer[ 8..10]),
             // future:         slice_cnt!(frame_buffer, 10, 2),
             chunk_count:    slice_to!(u32, &frame_buffer[12..16]),
             chunks:         Vec::new(),
@@ -464,32 +460,30 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
 
             let size = {
                 let mut buffer = [0u8; size_of::<u32>()];
-                from.read(&mut buffer).unwrap();
+                let _ = from.read(&mut buffer).unwrap();
     
                 u32::from_le_bytes(buffer)
             };
 
             let chunk_type = {
                 let mut buffer = [0u8; size_of::<u16>()];
-                from.read(&mut buffer).unwrap();
+                let _ = from.read(&mut buffer).unwrap();
 
                 u16::from_le_bytes(buffer)
             };
 
-            let mut data: Vec<u8> = vec![];
-            data.reserve(size.try_into().unwrap());
-            data.resize(data.capacity(), 0);
+            let mut data: Vec<u8> = vec![0; size.try_into().unwrap()];
 
             from.seek(io::SeekFrom::Start(current_position)).unwrap();
-            from.read(&mut data).unwrap();
+            let _ = from.read(&mut data).unwrap();
 
             frame.chunks.push(
                 match chunk_type {
                     ASEPRITE_LAYER_CHUNK_MAGIC => {
-                        let layer_type = AsepriteLayerType::from(slice_to!(u16, &data[08..10]));
+                        let layer_type = AsepriteLayerType::from(slice_to!(u16, &data[ 8..10]));
                         let is_tilemap = layer_type == AsepriteLayerType::Tilemap;
                         Chunk::Layer(AsepriteLayerChunk {
-                            flags:          slice_to!(u16, &data[06..08]),
+                            flags:          slice_to!(u16, &data[ 6.. 8]),
                             // layer_type                       [08..10]
                             child_level:    slice_to!(u16, &data[10..12]),
                             // default_width:  slice_to!(u16, &data[12..14]),
@@ -510,8 +504,8 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
                     },
                     ASEPRITE_CEL_CHUNK_MAGIC => {
                         let mut r = Chunk::Cel(AsepriteCelChunk {
-                            layer_index: slice_to!(u16, &data[06..08]),
-                            x_pos:       slice_to!(i16, &data[08..10]),
+                            layer_index: slice_to!(u16, &data[ 6.. 8]),
+                            x_pos:       slice_to!(i16, &data[ 8..10]),
                             y_pos:       slice_to!(i16, &data[10..12]),
                             opacity:     data[12],
                             cel_type:    AsepriteCelType::from(slice_to!(u16, &data[13..15])),
@@ -574,7 +568,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
                     },
                     ASEPRITE_TAG_CHUNK_MAGIC => {
                         let mut tag_data = AsepriteTagChunk {
-                            tag_count:  slice_to!(u16, &data[06..08]),
+                            tag_count:  slice_to!(u16, &data[6..8]),
                             // future:     slice_cnt!(data, 8, 8),
                             tags:       Vec::<AsepriteTag>::new() 
                         };
@@ -584,10 +578,10 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
                             let name_len = slice_to!(u16, &data[(17 + offset)..(19 + offset)]) as usize;
 
                             tag_data.tags.push(AsepriteTag {
-                                from:           slice_to!(u16, &data[(00 + offset)..(02 + offset)]),
-                                to:             slice_to!(u16, &data[(02 + offset)..(04 + offset)]),
+                                from:           slice_to!(u16, &data[(    offset)..(2 + offset)]),
+                                to:             slice_to!(u16, &data[(2 + offset)..(4 + offset)]),
                                 direction:      AsepriteTagDirection::from(data[4 + offset]),
-                                repeat_count:   slice_to!(u16, &data[(05 + offset)..(07 + offset)]),
+                                repeat_count:   slice_to!(u16, &data[(5 + offset)..(7 + offset)]),
                                 // reserved:       slice_cnt!(data, {7 + offset}, 6),
                                 // colour:         slice_cnt!(data, {13 + offset}, 3),
                                 // extra:          data[ 16 + offset],

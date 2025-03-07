@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::ops::{Div, Mul, Sub};
-use std::usize;
 use std::{f32::consts::FRAC_PI_3, ffi::CString, fs::File};
 
 use raylib::prelude::*;
@@ -132,10 +131,7 @@ impl LoadedSprite {
             Err(e) => return Err(AsepriteError::Other(Box::new(e))),
         };
     
-        let mut main_data: Aseprite = match aseprite::read(&mut f_in) {
-            Ok(d) => d,
-            Err(err) => return Err(err),
-        };
+        let mut main_data: Aseprite = aseprite::read(&mut f_in)?;
 
         let mut loaded_cels = vec![];
         let mut loaded_layers = vec![];
@@ -183,7 +179,7 @@ impl LoadedSprite {
                                     });
         
                                     let mut txtr = rl.load_texture_from_image(thread, &img).unwrap();
-                                    txtr.update_texture(&img_data);
+                                    txtr.update_texture(img_data);
         
                                     loaded_cels.push(PreparedCel{
                                         // image:           Some(img),
@@ -239,15 +235,13 @@ impl LoadedSprite {
                         };
                     },
                     aseprite::Chunk::Tag(tag) => {
-                        let mut i = 0;
-                        for tag in &tag.tags {
+                        for (i, tag) in tag.tags.iter().enumerate() {
                             loaded_tags.push(PreparedTag {
                                 from:      tag.from.into(),
                                 to:        tag.to.into(),
                                 direction: tag.direction,
                                 name:      tag.name.as_str().unwrap_or(format!("Tag {i}").as_str()).to_owned(),
                             });
-                            i += 1;
                         }
                     }
                     _ => ()
@@ -259,8 +253,7 @@ impl LoadedSprite {
             let mut parent_map: HashMap<i32, usize> = HashMap::<i32, usize>::new();
             parent_map.insert(-1, NO_PARENT);
 
-            for layer_idx in 0..loaded_layers.len() {
-                let layer = &mut loaded_layers[layer_idx];
+            for (layer_idx, layer) in loaded_layers.iter_mut().enumerate() {
                 parent_map.insert(layer.child_level as i32, layer_idx);
 
                 layer.parent_index = *parent_map.get(&((layer.child_level as i32) - 1)).unwrap_or(&NO_PARENT);
@@ -326,7 +319,7 @@ impl LoadedSprite {
 
                     d.draw_circle(
                         (link as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)) as i32, 
-                        (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) as i32 * -1, 
+                        -(img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0)) as i32, 
                         6.0 + f32::sin(d.get_time() as f32 * 1.7) * 2.4,
                         rect_colour
                     );
@@ -364,8 +357,8 @@ impl LoadedSprite {
                     }
                 }
 
-                let tx = (img.frame_index as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)) as i32;
-                let ty = (img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0) + 16.) as i32 * -1;
+                let tx =  (img.frame_index as f32 * (self.offset.x) + (self.image_width as f32 / 2.0)) as i32;
+                let ty = -(img.layer_index as f32 * (self.offset.y) - (self.image_height as f32 / 2.0) + 16.) as i32;
                 
                 d.draw_text(
                     format!("{}", link).as_str(), 
@@ -404,37 +397,37 @@ impl LoadedSprite {
         let line_alpha = (24. * cam.zoom).clamp(0., 255.) as u8;
 
         for (i, l) in self.loaded_layers.iter().enumerate() {
-            let m = d.measure_text(&l.full_name.as_ref().unwrap(), FONT_SIZE_REG);
+            let m = d.measure_text(l.full_name.as_ref().unwrap(), FONT_SIZE_REG);
             let my_alpha = line_alpha / if l.visible { 1 } else { 2 };
 
             d.draw_text(
                 l.full_name.as_ref().unwrap(),
-                (16 + m) * -1,
-                (self.offset.y as i32 * i as i32 - (self.offset.x / 2.0) as i32) * -1,
+                -(16 + m),
+                -(self.offset.y as i32 * i as i32 - (self.offset.x / 2.0) as i32),
                 FONT_SIZE_REG, LABEL_COLOR
             );
             
-            let line_y = ((self.offset.y) as i32 * i as i32) * -1;
+            let line_y = -((self.offset.y) as i32 * i as i32);
             let line_y2 = line_y + self.image_height as i32 * scale_y;
             
             d.draw_line(
-                (16 + m) * -1, line_y,
-                (16 + m) * -1 + (self.offset.x * self.frame_count as f32) as i32, line_y,
+                -(16 + m), line_y,
+                -(16 + m) + (self.offset.x * self.frame_count as f32) as i32, line_y,
                 Color{a: my_alpha, ..SMALL_LINE_COLOR}
             );
             
             d.draw_line(
-                (16 + m) * -1, line_y2,
-                (16 + m) * -1 + (self.offset.x * self.frame_count as f32) as i32, line_y2,
+                -(16 + m), line_y2,
+                -(16 + m) + (self.offset.x * self.frame_count as f32) as i32, line_y2,
                 Color{a: my_alpha, ..SMALL_LINE_COLOR}
             );
 
             d.draw_line_ex(
                 Vector2{
-                    x: ((16 + m) * -1) as f32,
+                    x: (-(16 + m)) as f32,
                     y: line_y2 as f32 + (GAP / 2) as f32 + 0.5,
                 }, Vector2{
-                    x: ((16 + m) * -1) as f32 + (self.offset.x * self.frame_count as f32),
+                    x: (-(16 + m)) as f32 + (self.offset.x * self.frame_count as f32),
                     y: line_y2 as f32 + (GAP / 2) as f32 + 0.5,
                 }, 
                 GAP as f32 + 1.,
@@ -458,23 +451,23 @@ impl LoadedSprite {
 
             d.draw_text(fstr,
                 ((self.offset.x) * i as f32) as i32 + width,
-                (self.offset.y * (self.loaded_layers.len() - 1) as f32 + 16.0) as i32 * -1,
+                -(self.offset.y * (self.loaded_layers.len() - 1) as f32 + 16.0) as i32,
                 FONT_SIZE_REG,
                 LABEL_COLOR
             );
             
-            let line_x = ((self.offset.x) * (i as f32) as f32) as i32;
+            let line_x = ((self.offset.x) * i as f32) as i32;
             let line_x2 = line_x + self.image_width as i32 * scale_x;
 
             d.draw_line(
                 line_x, (self.offset.y + 4.0) as i32, 
-                line_x, (self.offset.y * (self.loaded_layers.len() - 1) as f32 + 16.0) as i32 * -1,
+                line_x, -(self.offset.y * (self.loaded_layers.len() - 1) as f32 + 16.0) as i32,
                 Color{a: line_alpha, ..SMALL_LINE_COLOR}
             );
 
             d.draw_line(
                 line_x2, (self.offset.y + 4.0) as i32, 
-                line_x2, (self.offset.y * (self.loaded_layers.len() - 1) as f32 + 16.0) as i32 * -1,
+                line_x2, -(self.offset.y * (self.loaded_layers.len() - 1) as f32 + 16.0) as i32,
                 Color{a: line_alpha, ..SMALL_LINE_COLOR}
             );
 
@@ -516,7 +509,7 @@ impl LoadedSprite {
                 LABEL_COLOR
             );
 
-            let line_y = text_y + FONT_SIZE_REG as i32 + 4;
+            let line_y = text_y + FONT_SIZE_REG + 4;
 
             let from_x = ((self.offset.x) * (t.from as f32 - 1.0)) as i32 + self.image_width as i32;
             let to_x = ((self.offset.x) * (t.to as f32 - 0.7)) as i32 + self.image_width as i32;
