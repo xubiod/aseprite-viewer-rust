@@ -179,7 +179,7 @@ impl LoadedSprite {
                                     });
         
                                     let mut txtr = rl.load_texture_from_image(thread, &img).unwrap();
-                                    txtr.update_texture(img_data);
+                                    let _ = txtr.update_texture(img_data);
         
                                     loaded_cels.push(PreparedCel{
                                         // image:           Some(img),
