@@ -390,7 +390,7 @@ fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
                 let layer = &loaded.loaded_layers[effective_layer_active];
                 let properties_contents = format!(
                     "Blend mode: {}\nOpacity: {}{}{}",
-                    layer.blend_mode.to_string(), 
+                    layer.blend_mode, 
                     layer.opacity, 
                     if layer.background {"\nIs a background"} else {"\n"},
                     if layer.is_reference {"\nIs a reference"} else {"\n"},
