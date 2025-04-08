@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::ops::{Div, Mul, Sub};
-use std::{f32::consts::FRAC_PI_3, ffi::CString, fs::File};
+use std::{f32::consts::FRAC_PI_3, fs::File};
 
 use raylib::prelude::*;
 use raylib::{camera::Camera2D, color::Color, math::{Rectangle, Vector2}, texture::{RaylibTexture2D, Texture2D}, RaylibHandle, RaylibThread};
@@ -86,7 +86,7 @@ pub(crate) struct LoadedSprite {
     pub pixel_width:  u8,
     pub pixel_height: u8,
 
-    cached_list: Option<Box<CString>>
+    cached_list: Option<String>//Option<Box<CString>>
 }
 
 impl LoadedSprite {
@@ -568,9 +568,9 @@ impl LoadedSprite {
         self.cached_list = None
     }
 
-    pub fn generate_layer_list(&mut self) -> &CString {
+    pub fn generate_layer_list(&mut self) -> &str {
         if self.cached_list.is_none() {
-            self.cached_list = Some(Box::new(CString::new(self.loaded_layers.iter().rev()
+            self.cached_list = Some(self.loaded_layers.iter().rev()
             .map(|i| {
                 format!("{} {}",
                     if i.visible {
@@ -582,7 +582,7 @@ impl LoadedSprite {
                     } else { "#45#" },
                     i.full_name.as_ref().unwrap()
                 )
-            }).collect::<Vec<String>>().join(";").as_str()).ok().unwrap()));
+            }).collect::<Vec<String>>().join(";"));//).ok().unwrap()));
         }
 
         self.cached_list.as_ref().unwrap()

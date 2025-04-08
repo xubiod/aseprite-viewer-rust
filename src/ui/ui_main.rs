@@ -300,19 +300,19 @@ pub fn ui() {
 // }
 
 fn label_wrapper(d: &mut RaylibDrawHandle, bounds: impl Into<ffi::Rectangle>, text: &str, is_btn: bool) -> bool {
-    let lbl_str = CString::new(text).unwrap();
-    let lbl_str = lbl_str.as_c_str();
+    // let lbl_str = CString::new(text).unwrap();
+    // let lbl_str = lbl_str.as_c_str();
     if is_btn {
-        d.gui_label_button(bounds, Some(lbl_str))
+        d.gui_label_button(bounds, text)
     } else {
-        d.gui_label(bounds, Some(lbl_str))
+        d.gui_label(bounds, text)
     }
 }
 
 fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
     if let Some(ref mut loaded) = state.loaded_sprite {
         if state.layer_list_visible {
-            let dd_str = loaded.generate_layer_list().as_c_str();
+            let dd_str = loaded.generate_layer_list();
 
             let layer_list_rec = Rectangle{
                 x: 0.0,
@@ -322,7 +322,7 @@ fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
             };
 
             let _ = d.gui_list_view(
-                layer_list_rec, Some(dd_str), &mut state.layer_list_scroll, &mut state.layer_list_active
+                layer_list_rec, dd_str, &mut state.layer_list_scroll, &mut state.layer_list_active
             );
 
             let resize_area = Rectangle{
@@ -381,15 +381,15 @@ fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
                     height: 130.0,
                 };
 
-                let layer_name = CString::new(loaded.loaded_layers[effective_layer_active].name.as_str()).unwrap();
-                let layer_name = layer_name.as_c_str();
+                let layer_name = loaded.loaded_layers[effective_layer_active].name.as_str();
+                // let layer_name = layer_name.as_c_str();
 
-                if d.gui_window_box(prop_bounds, Some(layer_name)) {
+                if d.gui_window_box(prop_bounds, layer_name) {
                     state.layer_list_active = -1;
                 }
                 
                 let layer = &loaded.loaded_layers[effective_layer_active];
-                let properties_contents = rstr!(
+                let properties_contents = format!(
                     "Blend mode: {}\nOpacity: {}{}{}",
                     layer.blend_mode.to_string(), 
                     layer.opacity, 
@@ -402,14 +402,14 @@ fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
                     y: prop_bounds.y + 24.0,
                     width: prop_bounds.width,
                     height: 72.0
-                }, Some(properties_contents.as_c_str()));
+                }, properties_contents.as_ref());
 
                 if d.gui_check_box(Rectangle{
                     x: prop_bounds.x + 8.0,
                     y: prop_bounds.y + prop_bounds.height - 28.0,
                     width: 24.0,
                     height: 24.0,
-                }, Some(rstr!("Visible")), &mut loaded.loaded_layers[effective_layer_active].visible) {
+                }, "Visible", &mut loaded.loaded_layers[effective_layer_active].visible) {
                     loaded.invalidate_layer_list();
                 }
             }
@@ -418,7 +418,7 @@ fn layer_list(d: &mut RaylibDrawHandle, state: &mut UIState) {
 }
 
 fn bottom_bar(d: &mut RaylibDrawHandle, state: &mut UIState, cam: &Camera2D) {
-    d.gui_panel(Rectangle{x: 0., y: (state.window_h - 24) as f32, width: state.window_w as f32, height: 24.}, None);
+    d.gui_panel(Rectangle{x: 0., y: (state.window_h - 24) as f32, width: state.window_w as f32, height: 24.}, "");
 
     {
         let bounds = Rectangle{x: 0., y: (state.window_h - 24) as f32, width: 24., height: 24.};
@@ -440,11 +440,11 @@ fn bottom_bar(d: &mut RaylibDrawHandle, state: &mut UIState, cam: &Camera2D) {
     if state.show_zoom_reset {
         let rect = Rectangle{x: 28., y: (state.window_h - 72) as f32, width: 65., height: 24.};
 
-        if d.gui_button(rect, Some(rstr!("#43# fit"))) {
+        if d.gui_button(rect, "#43# fit") {
             state.desired_zoom = state.fit_zoom;
             state.show_zoom_reset = false
         }
-        if d.gui_button(Rectangle{y: rect.y + rect.height, ..rect}, Some(rstr!("#42# 100%"))) {
+        if d.gui_button(Rectangle{y: rect.y + rect.height, ..rect}, "#42# 100%") {
             state.desired_zoom = 1.;
             state.show_zoom_reset = false
         }
