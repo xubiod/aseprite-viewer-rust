@@ -455,7 +455,7 @@ pub fn read<T: io::Read + io::Seek>(from: &mut T) -> Result<Aseprite, AsepriteEr
             let current_position = from.stream_position().unwrap_or_default();
 
             if current_position >= frames_end {
-                println!("frame data spills out of the size in the header at pos {}!\ngoing to continue..", current_position)
+                println!("frame data spills out of the size in the header at pos {current_position}!\ngoing to continue..")
             }
 
             let size = {
