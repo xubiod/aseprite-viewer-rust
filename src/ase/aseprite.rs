@@ -105,6 +105,7 @@ impl Chunk {
 pub struct RawAsepriteChunk {
     pub size: u32,
     pub chunk_type: u16,
+    #[allow(dead_code)]
     pub data: Rc<[u8]>
 }
 
