@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 flate2 = "1.0.35"
-rand = "0.8.5"
+rand = "0.9.3"
 raylib = "5.0.2"
